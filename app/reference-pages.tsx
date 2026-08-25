@@ -22,6 +22,23 @@ function useReferenceReview(){
 const keyFor=(guide:string,item:string)=>`${guide}:${item}`;
 const isReviewItem=(mark?:ReviewMark)=>Boolean(mark?.saved||mark?.confidence==='hard'||mark?.confidence==='unsure');
 
+const referenceVisuals:Record<string,{kicker:string;main:string;detail:string}>={
+  tenses:{kicker:'PAST   NOW   FUTURE',main:'12 : 45',detail:'a moment in time'},
+  'irregular-verbs':{kicker:'BASE   PAST',main:'go → went',detail:'forms that transform'},
+  conditionals:{kicker:'POSSIBILITY',main:'IF → THEN',detail:'cause meets result'},
+  modals:{kicker:'CERTAINTY',main:'might / must',detail:'shade the meaning'},
+  articles:{kicker:'IDENTITY',main:'a · an · the',detail:'name what you mean'},
+  'verb-patterns':{kicker:'WHAT FOLLOWS?',main:'-ing / to',detail:'choose the pattern'},
+  passive:{kicker:'CHANGE THE FOCUS',main:'A ← B',detail:'the action comes first'},
+  reported:{kicker:'PASS IT ON',main:'“…” → …',detail:'shift the viewpoint'},
+  'phrasal-verbs':{kicker:'ONE NEW MEANING',main:'turn + up',detail:'words work together'},
+  prepositions:{kicker:'RELATIONSHIPS',main:'in · on · at',detail:'place words precisely'},
+  collocations:{kicker:'NATURAL PAIRS',main:'make + sense',detail:'words that belong'},
+  'confused-words':{kicker:'SPOT THE DIFFERENCE',main:'affect ≠ effect',detail:'close, but not the same'},
+  'word-formation':{kicker:'BUILD A WORD',main:'act → action',detail:'change its job'},
+  'phrase-bank':{kicker:'READY TO USE',main:'“In my view…”',detail:'start with confidence'}
+};
+
 function ReferenceNav({current,navigate}:{current?:string;navigate:Navigate}){
   const options=[{id:'tenses',label:'Tenses',path:'/reference/tenses'},{id:'irregular-verbs',label:'Irregular verbs',path:'/reference/irregular-verbs'},...referenceGuides.map(g=>({id:g.id,label:g.shortTitle,path:`/reference/guide/${g.id}`}))];
   return <nav className="reference-nav expanded" aria-label="Reference categories">{options.map(option=><button key={option.id} className={current===option.id?'active':''} aria-current={current===option.id?'page':undefined} onClick={()=>navigate(option.path)}>{option.label}</button>)}</nav>;
@@ -55,7 +72,10 @@ export function ReferenceHubPage({navigate}:{navigate:Navigate}){
     <section className="reference-hero"><p className="eyebrow">Learning tools</p><h1>Find it. Test it.<br/><em>Use it confidently.</em></h1><p>Clear reference guides now include comparisons, common mistakes, recall checks and a personal review list.</p></section>
     <section className="reference-library"><div className="reference-library-head"><div><p className="eyebrow">Reference library</p><h2>{core.length} focused guides</h2><p>{reviewCount} {reviewCount===1?'item':'items'} waiting in your review list.</p></div>{reviewCount>0&&<button className="button primary" onClick={()=>navigate('/reference/review')}>Review difficult items →</button>}</div>
       <div className="reference-category-filters">{categories.map(value=><button key={value} className={category===value?'active':''} onClick={()=>setCategory(value)}>{value}</button>)}</div>
-      <div className="reference-hub expanded-hub">{visible.map((card,index)=><article key={card.id}><span>{String(index+1).padStart(2,'0')}</span><p className="eyebrow">{card.category} · {card.level}</p><h2>{card.title}</h2><p>{card.description}</p><button onClick={()=>navigate(card.path)}>Open guide →</button></article>)}</div>
+      <div className="reference-hub expanded-hub">{visible.map((card,index)=>{const visual=referenceVisuals[card.id]??{kicker:'REFERENCE',main:'A → B',detail:'see the pattern'};return <article className="reference-library-card" data-guide={card.id} key={card.id}>
+        <div className="reference-card-visual" aria-hidden="true"><span>{visual.kicker}</span><strong>{visual.main}</strong><i>{visual.detail}</i></div>
+        <div className="reference-card-body"><div className="reference-card-meta"><p className="eyebrow">{card.category} · {card.level}</p><span>{String(index+1).padStart(2,'0')}</span></div><h2>{card.title}</h2><p>{card.description}</p><button onClick={()=>navigate(card.path)}>Open guide <span aria-hidden="true">→</span></button></div>
+      </article>})}</div>
     </section>
     <button className="floating-back" onClick={()=>navigate('/')}>← Back to lessons</button>
   </main>;
