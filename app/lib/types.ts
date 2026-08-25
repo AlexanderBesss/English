@@ -35,6 +35,7 @@ export interface TopicSeed {
   summary: string; keywords: string[]; focus: string; correct: string; wrong: string;
   question: string; choices: string[]; answer: string; gap: string; gapAnswer: string;
   gapChoices?: string[];
+  answerWhy?: string; gapWhy?: string; mistakeWhy?: string; transformWhy?: string;
   transform: string; transformAnswer: string; prerequisite?: string; transcript?: string;
   table?: { headers: string[]; rows: string[][] };
 }

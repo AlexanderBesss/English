@@ -66,10 +66,10 @@ function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:Prog
     </section>
 
     <section className="tense-path-section" aria-labelledby="tense-path-title">
-      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div><p>Start with the tense system, then choose the contrast you need. Every lesson includes examples and 12 practice questions.</p></div>
+      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div><p>Start with the tense system, then choose the contrast you need. Every lesson includes examples and 50 practice questions.</p></div>
       <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);const ready=isReady(topic);const selected=topic.id===selectedTopic.id;return <article className={`tense-lesson-row ${selected?'selected':''}`} key={topic.id}>
         <button className="tense-select" onClick={()=>setSelectedId(topic.id)} aria-pressed={selected}><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span><span className="lesson-status">{p.completed?'Completed':p.attempts?`Best ${p.bestScore}%`:ready?'Ready':'Builds on lesson 1'}</span></button>
-        <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>12 questions →</button></div>
+        <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>{topic.exercises.length} questions →</button></div>
       </article>})}</div>
     </section>
   </main>;
@@ -108,7 +108,7 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
       </article>
       <aside className="lesson-sidebar"><strong>In this lesson</strong><a href={`#${topic.sections[0].id}`}>Key idea</a><span>Meaning and examples</span><span>Common mistake</span><span>Production task</span><div className="sidebar-score"><small>Your best score</small><b>{p.attempts?`${p.bestScore}%`:'Not attempted'}</b></div></aside>
     </div>
-    <section className="practice-cta"><div><p className="eyebrow">Ready to check your understanding?</p><h2>12 questions. Instant feedback.</h2></div><button className="button primary" onClick={()=>navigate(`/practice/${topic.id}`)}>Start practice <span>→</span></button></section>
+    <section className="practice-cta"><div><p className="eyebrow">Ready to check your understanding?</p><h2>{topic.exercises.length} questions. Instant feedback.</h2></div><button className="button primary" onClick={()=>navigate(`/practice/${topic.id}`)}>Start practice <span>→</span></button></section>
   </main>;
 }
 
@@ -130,9 +130,9 @@ function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:strin
   return <main className="practice-page">
     <div className="practice-top"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>× Exit</button><div><span>{topic.title}</span><div className="practice-bar"><i style={{width:`${checked.filter(Boolean).length/topic.exercises.length*100}%`}}/></div></div><strong>{checked.filter(Boolean).length} / {topic.exercises.length} answered</strong></div>
     <div className="practice-workspace">
-    <aside className="question-list" aria-label="Question list"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>All questions</h2><span>Select any question</span></div>{topic.exercises.map((item,i)=><button key={item.id} className={`${i===index?'active':''} ${checked[i]?'answered':''}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined}><span>{checked[i]?(isCorrect(selectionOnly?answers[i]:item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)?'✓':'×'):i+1}</span><span><strong>{selectionOnly?'pick one option':item.type.replaceAll('-',' ')}</strong><small>{item.prompt}</small></span></button>)}</aside>
+    <aside className="question-list" aria-label="Question list"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>All questions</h2><span>Select any question</span></div>{topic.exercises.map((item,i)=><button key={item.id} className={`${i===index?'active':''} ${checked[i]?'answered':''}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined}><span>{checked[i]?(isCorrect(selectionOnly?answers[i]:item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)?'✓':'×'):i+1}</span><span>{!selectionOnly&&<strong>{item.type.replaceAll('-',' ')}</strong>}<small>{item.prompt}</small></span></button>)}</aside>
     <section className="question-card">
-      <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div><div className="question-type">{selectionOnly?(exercise.id.endsWith('-01')?'Select the correct tense':'Pick one option'):exercise.type.replace('-',' ')}</div><h1>{exercise.prompt}</h1>
+      <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div>{!selectionOnly&&<div className="question-type">{exercise.type.replace('-',' ')}</div>}<h1>{exercise.prompt}</h1>
       <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose} forceOptions={selectionOnly}/>
       {checked[index]&&<div className={`feedback ${correct?'correct':'incorrect'}`} role="status"><strong>{correct?'✓ Correct':'Not quite yet'}</strong><p>{exercise.answer.explanation}</p>{!correct&&<p className="answer-line">Answer: {exercise.answer.values[0]}</p>}</div>}
       <div className="question-actions">{!checked[index]?<button className="button primary" disabled={!answerValue.trim()} onClick={submit}>Check answer</button>:<button className="button primary" onClick={next}>{checked.every(Boolean)?'See result':'Next unanswered'} →</button>}</div>

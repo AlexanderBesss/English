@@ -7,18 +7,18 @@ export function isCorrect(input: string, answers: string[]) {
 }
 
 export function createExercises(seed: TopicSeed): Exercise[] {
-  const explanation = `This checks the central idea: ${seed.focus}`;
+  const explanation = seed.answerWhy ?? `This checks the central idea: ${seed.focus}`;
   const gapChoices = seed.gapChoices ?? [seed.gapAnswer, seed.answer, seed.correct];
-  const correctExplanation = `“${seed.correct}” applies the target pattern accurately.`;
+  const correctExplanation = seed.mistakeWhy ?? `“${seed.correct}” applies the target pattern accurately because ${seed.focus.charAt(0).toLowerCase()}${seed.focus.slice(1)}`;
   return [
     { id: `${seed.id}-01`, type: 'multiple-choice', prompt: seed.question, options: seed.choices, answer: { values: [seed.answer], explanation } },
     { id: `${seed.id}-02`, type: 'multiple-choice', prompt: 'Which sentence uses the target language accurately?', options: [seed.wrong,seed.correct,seed.transformAnswer], answer: { values: [seed.correct], explanation: correctExplanation } },
-    { id: `${seed.id}-03`, type: 'gap-fill', prompt: `Complete the sentence: ${seed.gap}`, options: gapChoices, answer: { values: [seed.gapAnswer], explanation: `The missing language is “${seed.gapAnswer}”. ${explanation}` } },
+    { id: `${seed.id}-03`, type: 'gap-fill', prompt: `Complete the sentence: ${seed.gap}`, options: gapChoices, answer: { values: [seed.gapAnswer], explanation: seed.gapWhy ?? `The missing language is “${seed.gapAnswer}”. ${explanation}` } },
     { id: `${seed.id}-04`, type: 'error-correction', prompt: `Choose the correct sentence: ${seed.wrong}`, options: [seed.wrong,seed.correct,seed.transformAnswer], answer: { values: [seed.correct], explanation: correctExplanation } },
     { id: `${seed.id}-05`, type: 'ordering', prompt: 'Which sentence has the correct word order?', options: [seed.transformAnswer,seed.wrong,seed.correct], tokens: seed.correct.replace(/[.!?]/g, '').split(' ').sort((a,b) => a.localeCompare(b)), answer: { values: [seed.correct], explanation: 'The word order follows the pattern shown in the lesson.' } },
-    { id: `${seed.id}-06`, type: 'transformation', prompt: seed.transform, options: [seed.correct,seed.wrong,seed.transformAnswer], answer: { values: [seed.transformAnswer], explanation: `A strong transformation is: “${seed.transformAnswer}”` } },
-    { id: `${seed.id}-07`, type: 'short-answer', prompt: `Choose the key missing form: ${seed.gap}`, options: [gapChoices[1],gapChoices[0],gapChoices[2]], answer: { values: [seed.gapAnswer], explanation: `“${seed.gapAnswer}” completes the meaning and form.` } },
-    { id: `${seed.id}-08`, type: 'multiple-choice', prompt: 'Which version should you avoid?', options: [seed.correct, seed.wrong], answer: { values: [seed.wrong], explanation: `Avoid “${seed.wrong}”; it contains the common mistake highlighted in this lesson.` } },
+    { id: `${seed.id}-06`, type: 'transformation', prompt: seed.transform, options: [seed.correct,seed.wrong,seed.transformAnswer], answer: { values: [seed.transformAnswer], explanation: seed.transformWhy ?? `“${seed.transformAnswer}” expresses the requested meaning with the target form.` } },
+    { id: `${seed.id}-07`, type: 'short-answer', prompt: `Choose the key missing form: ${seed.gap}`, options: [gapChoices[1],gapChoices[0],gapChoices[2]], answer: { values: [seed.gapAnswer], explanation: seed.gapWhy ?? `“${seed.gapAnswer}” completes the meaning and form.` } },
+    { id: `${seed.id}-08`, type: 'multiple-choice', prompt: 'Which version should you avoid?', options: [seed.correct, seed.wrong], answer: { values: [seed.wrong], explanation: seed.mistakeWhy ?? `Avoid “${seed.wrong}” because it does not follow the target pattern: ${seed.focus}` } },
     { id: `${seed.id}-09`, type: 'gap-fill', prompt: `Choose the best answer: ${seed.question}`, options: seed.choices, answer: { values: [seed.answer], explanation } },
     { id: `${seed.id}-10`, type: 'matching', prompt: `Choose the example that matches this lesson idea: ${seed.focus}`, options: [seed.wrong,seed.correct,seed.transformAnswer], answer: { values: [seed.correct], explanation: correctExplanation } },
     { id: `${seed.id}-11`, type: 'multiple-choice', prompt: 'Choose the most accurate explanation.', options: ['The forms are always interchangeable.',seed.focus,'Only the final word determines the meaning.'], answer: { values: [seed.focus], explanation } },

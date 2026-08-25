@@ -11,13 +11,15 @@ describe('course content',()=>{
  it('validates unique and complete exercise banks',()=>{
   expect(()=>validateTopics(topics)).not.toThrow();
   expect(topics.every(topic=>topic.exercises.length>=12)).toBe(true);
-  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(360);
+  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(512);
  });
  it('contains every planned category',()=>expect(new Set(topics.map(t=>t.category)).size).toBe(7));
  it('gives every tense-path question selectable options',()=>{
   const tenseIds=['tense-system','present-perfect','narrative-tenses','future-forms'];
-  const tenseExercises=topics.filter(topic=>tenseIds.includes(topic.id)).flatMap(topic=>topic.exercises);
-  expect(tenseExercises).toHaveLength(48);
+  const tenseTopics=topics.filter(topic=>tenseIds.includes(topic.id));
+  const tenseExercises=tenseTopics.flatMap(topic=>topic.exercises);
+  expect(tenseTopics.every(topic=>topic.exercises.length===50)).toBe(true);
+  expect(tenseExercises).toHaveLength(200);
   expect(tenseExercises.every(exercise=>exercise.options?.length&&exercise.options.includes(exercise.answer.values[0]))).toBe(true);
  });
 });
