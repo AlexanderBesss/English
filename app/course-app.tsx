@@ -48,27 +48,12 @@ function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate
 
 function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
   const tenseTopics=TENSE_LESSON_IDS.map(id=>getTopic(id)).filter((topic):topic is Topic=>Boolean(topic));
-  const [selectedId,setSelectedId]=useState(()=>progress.lastOpened&&TENSE_LESSON_IDS.includes(progress.lastOpened)?progress.lastOpened:'tense-system');
-  const selectedTopic=getTopic(selectedId)??tenseTopics[0];
-  const completedCount=tenseTopics.filter(topic=>topicProgress(progress,topic.id).completed).length;
-  const attempts=tenseTopics.reduce((sum,topic)=>sum+topicProgress(progress,topic.id).attempts,0);
   const isReady=(topic:Topic)=>!topic.prerequisite||topicProgress(progress,topic.prerequisite).completed;
   return <main>
-    <section className="dash-hero tense-hero">
-      <div><p className="eyebrow">Your tense learning path</p><h1>Choose the right tense.<br/><em>Say exactly when.</em></h1><p className="hero-lede">Follow four focused lessons to understand time, compare similar forms and choose the tense that fits each situation.</p><div className="path-progress"><span>{completedCount} of {tenseTopics.length} lessons complete</span><i><b style={{width:`${tenseTopics.length?completedCount/tenseTopics.length*100:0}%`}}/></i></div></div>
-      <div className="today-card">
-        <div className="today-card-top"><span>Selected lesson</span><b>{selectedTopic.minutes} min</b></div>
-        <span className="category-pill coral">Tenses</span>
-        <h2>{selectedTopic.title}</h2><p>{selectedTopic.summary}</p>
-        <div className="selected-lesson-actions"><button className="button primary" onClick={()=>navigate(`/lesson/${selectedTopic.id}`)}>Open lesson <span>→</span></button><button className="button secondary" onClick={()=>navigate(`/practice/${selectedTopic.id}`)}>Practice</button></div>
-        <div className="learning-summary"><span><strong>{completedCount}</strong> completed</span><span><strong>{attempts}</strong> practices</span><span><strong>{topicProgress(progress,selectedTopic.id).bestScore}%</strong> best score</span></div>
-      </div>
-    </section>
-
     <section className="tense-path-section" aria-labelledby="tense-path-title">
       <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div><p>Start with the tense system, then choose the contrast you need. Every lesson includes examples and 50 practice questions.</p></div>
-      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);const ready=isReady(topic);const selected=topic.id===selectedTopic.id;return <article className={`tense-lesson-row ${selected?'selected':''}`} key={topic.id}>
-        <button className="tense-select" onClick={()=>setSelectedId(topic.id)} aria-pressed={selected}><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span><span className="lesson-status">{p.completed?'Completed':p.attempts?`Best ${p.bestScore}%`:ready?'Ready':'Builds on lesson 1'}</span></button>
+      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);const ready=isReady(topic);return <article className="tense-lesson-row" key={topic.id}>
+        <div className="tense-select"><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span><span className="lesson-status">{p.completed?'Completed':p.attempts?`Best ${p.bestScore}%`:ready?'Ready':'Builds on lesson 1'}</span></div>
         <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>{topic.exercises.length} questions →</button></div>
       </article>})}</div>
     </section>
