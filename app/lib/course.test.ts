@@ -13,10 +13,21 @@ describe('course content',()=>{
  });
  it('validates unique and complete exercise banks',()=>{
   expect(()=>validateTopics(topics)).not.toThrow();
-  expect(topics.every(topic=>topic.exercises.length>=12)).toBe(true);
-  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(620);
+  expect(topics.every(topic=>topic.exercises.length>=24)).toBe(true);
+  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(1040);
  });
  it('contains every planned category',()=>expect(new Set(topics.map(t=>t.category)).size).toBe(7));
+ it('keeps every exercise in its own lesson bank',()=>{
+  for(const topic of topics){
+   expect(topic.exercises.every(exercise=>exercise.id.startsWith(`${topic.id}-`))).toBe(true);
+  }
+ });
+ it('uses choices or clickable word tokens for every question',()=>{
+  for(const exercise of topics.flatMap(topic=>topic.exercises)){
+   if(exercise.type==='ordering')expect(exercise.tokens?.length).toBeGreaterThan(0);
+   else expect(exercise.options).toContain(exercise.answer.values[0]);
+  }
+ });
  it('gives every tense-path question selectable options',()=>{
   const tenseIds=['tense-system','present-perfect','narrative-tenses','future-forms'];
   const tenseTopics=topics.filter(topic=>tenseIds.includes(topic.id));

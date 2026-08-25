@@ -115,5 +115,5 @@ export function expandTensePractice(topic:Topic):Topic {
       {id:`${topic.id}-${String(start+1).padStart(2,'0')}`,type:'multiple-choice',prompt:`Which tense or future form is used here? “${completed}”`,options:rotateOptions(labels,tense,index),answer:{values:[tense],explanation:`This is ${tense} because the verb phrase “${answer}” follows that form and expresses its time viewpoint.`}},
     ];
   });
-  return {...topic,exercises:[...topic.exercises,...additions]};
+  return {...topic,exercises:[...topic.exercises.slice(0,12),...additions]};
 }

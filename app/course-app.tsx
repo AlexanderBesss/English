@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { categoryInfo, categoryOrder, getTopic, topics } from './content';
 import { isCorrect } from './content/shared';
-import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, toggleBookmark, topicProgress } from './lib/progress';
+import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, topicProgress } from './lib/progress';
 import { filterTopics, type TopicStatus } from './lib/search';
 import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
 import { GeneralReferencePage, IrregularReferencePage, ReferenceHubPage, ReferenceReviewPage, TensesReferencePage } from './reference-pages';
@@ -48,13 +48,13 @@ function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate
   </header>;
 }
 
-function Dashboard({navigate,progress,save}:{navigate:(to:string)=>void;progress:ProgressState;save:(p:ProgressState)=>void}) {
+function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState<'all'|CategoryId>('all');
   const [status,setStatus]=useState<TopicStatus>('all');
   const visible=filterTopics(B1_TOPICS,progress,query,category,'B1+',status);
   return <main>
-    <section className="library-section course-library"><div className="library-title"><div><h1>B1+ lessons</h1><p>{visible.length} of {B1_TOPICS.length} lessons</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search lessons…" aria-label="Search B1+ lessons"/></label></div><div className="filters"><select value={category} onChange={event=>setCategory(event.target.value as 'all'|CategoryId)} aria-label="Filter by category"><option value="all">All areas</option>{categoryOrder.map(id=><option value={id} key={id}>{categoryInfo[id].name}</option>)}</select><select value={status} onChange={event=>setStatus(event.target.value as TopicStatus)} aria-label="Filter by progress"><option value="all">All progress</option><option value="open">Not completed</option><option value="complete">Completed</option><option value="bookmarked">Bookmarked</option></select>{(query||category!=='all'||status!=='all')&&<button className="clear-filter" onClick={()=>{setQuery('');setCategory('all');setStatus('all')}}>Clear filters</button>}</div><div className="topic-grid">{visible.map(topic=>{const p=topicProgress(progress,topic.id);return <article className="topic-card" key={topic.id}><div className="topic-meta"><span className={`category-pill ${categoryInfo[topic.category].colour}`}>{categoryInfo[topic.category].name}</span><span>{p.completed?'✓ Complete':`${topic.minutes} min`}</span></div><h3>{topic.title}</h3><p>{topic.summary}</p><div className="topic-card-footer"><button className={`bookmark ${p.bookmarked?'saved':''}`} onClick={()=>save(toggleBookmark(progress,topic.id))} aria-label={`${p.bookmarked?'Remove':'Add'} bookmark for ${topic.title}`}>{p.bookmarked?'★':'☆'}</button><span>{topic.exercises.length} questions</span><button onClick={()=>navigate(`/lesson/${topic.id}`)} aria-label={`Open ${topic.title}`}>→</button></div></article>})}</div>{!visible.length&&<div className="empty-state"><strong>No lessons match those filters.</strong><p>Try another area or clear the search.</p></div>}</section>
+    <section className="library-section course-library"><div className="library-title"><div><h1>B1+ lessons</h1><p>{visible.length} of {B1_TOPICS.length} lessons</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search lessons…" aria-label="Search B1+ lessons"/></label></div><div className="filters"><select value={category} onChange={event=>setCategory(event.target.value as 'all'|CategoryId)} aria-label="Filter by category"><option value="all">All areas</option>{categoryOrder.map(id=><option value={id} key={id}>{categoryInfo[id].name}</option>)}</select><select value={status} onChange={event=>setStatus(event.target.value as TopicStatus)} aria-label="Filter by progress"><option value="all">All progress</option><option value="open">Not completed</option><option value="complete">Completed</option></select>{(query||category!=='all'||status!=='all')&&<button className="clear-filter" onClick={()=>{setQuery('');setCategory('all');setStatus('all')}}>Clear filters</button>}</div><div className="topic-grid">{visible.map(topic=>{const p=topicProgress(progress,topic.id);return <article className="topic-card" key={topic.id}><div className="topic-meta"><span className={`category-pill ${categoryInfo[topic.category].colour}`}>{categoryInfo[topic.category].name}</span>{p.completed&&<span>✓ Complete</span>}</div><h3>{topic.title}</h3><p>{topic.summary}</p><div className="topic-card-footer"><button className="practice-count" onClick={()=>navigate(`/practice/${topic.id}`)}>{topic.exercises.length} questions</button><button onClick={()=>navigate(`/lesson/${topic.id}`)} aria-label={`Open lesson: ${topic.title}`}>→</button></div></article>})}</div>{!visible.length&&<div className="empty-state"><strong>No lessons match those filters.</strong><p>Try another area or clear the search.</p></div>}</section>
   </main>;
 }
 
@@ -118,7 +118,7 @@ function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:strin
     <aside className="question-list" aria-label="Question board"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>Questions</h2><span>Select a number</span></div><div className="question-grid">{topic.exercises.map((item,i)=>{const answeredCorrectly=checked[i]&&isCorrect(selectionOnly?answers[i]:item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values);const status=checked[i]?(answeredCorrectly?'correct':'incorrect'):'unanswered';return <button key={item.id} className={`${i===index?'active':''} ${status}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined} aria-label={`Question ${i+1}, ${status}`}><span>{i+1}</span></button>})}</div></aside>
     <section className="question-card">
       <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div>{!selectionOnly&&<div className="question-type">{exercise.type.replace('-',' ')}</div>}<h1>{exercise.prompt}</h1>
-      <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose} forceOptions={selectionOnly}/>
+      <ExerciseInput exercise={exercise} input={input} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose}/>
       {checked[index]&&<div className={`feedback ${correct?'correct':'incorrect'}`} role="status"><strong>{correct?'✓ Correct':'Not quite yet'}</strong><p>{exercise.answer.explanation}</p>{!correct&&<p className="answer-line">Answer: {exercise.answer.values[0]}</p>}</div>}
       <div className="question-actions">{!checked[index]?<button className="button primary" disabled={!answerValue.trim()} onClick={submit}>Check answer</button>:<button className="button primary" onClick={next}>{checked.every(Boolean)?'See result':'Next unanswered'} →</button>}</div>
     </section>
@@ -126,10 +126,9 @@ function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:strin
   </main>;
 }
 
-function ExerciseInput({exercise,input,setInput,selected,setSelected,checked,choose,forceOptions=false}:{exercise:Exercise;input:string;setInput:(v:string)=>void;selected:string[];setSelected:(v:string[])=>void;checked:boolean;choose:(v:string)=>void;forceOptions?:boolean}) {
-  if(forceOptions||exercise.type==='multiple-choice'||exercise.type==='matching')return <div className="option-list">{exercise.options?.map((option,i)=><button disabled={checked} className={input===option?'selected':''} onClick={()=>choose(option)} key={`${option}-${i}`}><span>{String.fromCharCode(65+i)}</span>{option}</button>)}</div>;
+function ExerciseInput({exercise,input,selected,setSelected,checked,choose}:{exercise:Exercise;input:string;selected:string[];setSelected:(v:string[])=>void;checked:boolean;choose:(v:string)=>void}) {
   if(exercise.type==='ordering')return <div><div className="order-answer">{selected.length?selected.map((token,i)=><button disabled={checked} key={i} onClick={()=>setSelected(selected.filter((_,j)=>j!==i))}>{token}</button>):<span>Select words to build the sentence</span>}</div><div className="token-list">{exercise.tokens?.map((token,i)=>{const availableOccurrence=exercise.tokens!.slice(0,i+1).filter(t=>t===token).length;const used=selected.filter(t=>t===token).length;return <button disabled={checked||used>=availableOccurrence} key={i} onClick={()=>setSelected([...selected,token])}>{token}</button>})}</div></div>;
-  return <label className="answer-input"><span>Your answer</span><input disabled={checked} value={input} onChange={e=>setInput(e.target.value)} placeholder={exercise.type==='gap-fill'||exercise.type==='short-answer'?'Type the missing word or phrase':'Write the complete corrected sentence'}/></label>;
+  return <div className="option-list">{exercise.options?.map((option,i)=><button disabled={checked} className={input===option?'selected':''} onClick={()=>choose(option)} key={`${option}-${i}`}><span>{String.fromCharCode(65+i)}</span>{option}</button>)}</div>;
 }
 
 function NotFound({navigate}:{navigate:(to:string)=>void}) {return <main className="not-found"><p className="eyebrow">404</p><h1>That lesson wandered off.</h1><p>The link may be outdated. The complete curriculum is waiting on the dashboard.</p><button className="button primary" onClick={()=>navigate('/')}>Return home</button></main>}
@@ -139,7 +138,7 @@ export default function CourseApp() {
   const {progress,save,hydrated:progressHydrated}=useProgress();
   const {theme,toggle:toggleTheme}=useTheme();
   let content;
-  if(path==='/')content=<Dashboard navigate={navigate} progress={progress} save={save}/>;
+  if(path==='/')content=<Dashboard navigate={navigate} progress={progress}/>;
   else if(path==='/reference')content=<ReferenceHubPage navigate={navigate}/>;
   else if(path==='/reference/tenses')content=<TensesReferencePage navigate={navigate}/>;
   else if(path==='/reference/irregular-verbs')content=<IrregularReferencePage navigate={navigate}/>;

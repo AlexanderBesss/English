@@ -5,7 +5,7 @@ import { tenseComparisons, tenseReferences } from './content/grammar/tenses';
 import { irregularVerbs } from './content/verbs/irregulars';
 import { getReferenceGuide, referenceGuides, type ReferenceItem } from './content/reference/guides';
 import { softwareGuideExamples, softwareTenseComparisonExamples, softwareTenseExamples, softwareVerbExamples } from './content/reference/software-examples';
-import { SpeechButton } from './speech-button';
+import { createBritishWomanUtterance, SpeechButton } from './speech-button';
 
 type Navigate=(to:string)=>void;
 type Confidence='hard'|'unsure'|'known';
@@ -147,7 +147,7 @@ export function IrregularReferencePage({navigate}:{navigate:Navigate}){
   const filtered=irregularVerbs.filter(v=>[...Object.values(v),...examplesForVerb(v)].join(' ').toLowerCase().includes(query.toLowerCase())).filter(v=>pattern==='All'||verbPattern(v.base,v.past,v.participle)===pattern).filter(v=>tier==='All'||(tier==='Essential'?essentialVerbs.has(v.base):!essentialVerbs.has(v.base))).filter(v=>mode!=='review'||isReviewItem(review[keyFor('verbs',v.base)]));
   const current=filtered[testIndex%Math.max(filtered.length,1)];
   const next=()=>{setTestIndex(i=>i+1);setPastInput('');setPartInput('');setChecked(false)};
-  const speak=(text:string)=>{if('speechSynthesis'in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';window.speechSynthesis.speak(u)}};
+  const speak=(text:string)=>{if('speechSynthesis'in window){window.speechSynthesis.cancel();window.speechSynthesis.speak(createBritishWomanUtterance(text))}};
   const correct=Boolean(current&&pastInput.trim().toLowerCase()===current.past.toLowerCase()&&partInput.trim().toLowerCase()===current.participle.toLowerCase());
   return <main className="reference-page"><section className="reference-table-section"><ReferenceNav current="irregular-verbs" navigate={navigate}/><div className="reference-mode-tabs" role="tablist">{(['table','test','review'] as const).map(value=><button role="tab" aria-selected={mode===value} className={mode===value?'active':''} key={value} onClick={()=>{setMode(value);setTestIndex(0)}}>{value==='table'?'Browse & hide forms':value==='test'?'Test yourself':'My review list'}</button>)}</div>
       <div className="library-title"><div><h2>{filtered.length} irregular verbs</h2></div><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search go, went or gone…" aria-label="Search irregular verbs"/></label></div>
