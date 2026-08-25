@@ -115,13 +115,14 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
 function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:string)=>void;progress:ProgressState;save:(p:ProgressState)=>void}) {
   const [index,setIndex]=useState(0),[answers,setAnswers]=useState<string[]>(()=>topic.exercises.map(()=>'')),[orders,setOrders]=useState<string[][]>(()=>topic.exercises.map(()=>[])),[checked,setChecked]=useState<boolean[]>(()=>topic.exercises.map(()=>false)),[done,setDone]=useState(false);
   const exercise=topic.exercises[index];
+  const selectionOnly=TENSE_LESSON_IDS.includes(topic.id);
   const input=answers[index]??'',selected=orders[index]??[];
-  const answerValue=exercise.type==='ordering'?selected.join(' '):input;
+  const answerValue=selectionOnly?input:exercise.type==='ordering'?selected.join(' '):input;
   const correct=isCorrect(answerValue,exercise.answer.values);
   const setInput=(value:string)=>setAnswers(current=>current.map((answer,i)=>i===index?value:answer));
   const setSelected=(value:string[])=>setOrders(current=>current.map((answer,i)=>i===index?value:answer));
   const choose=(option:string)=>{if(!checked[index])setInput(option)};
-  const scoreCount=topic.exercises.filter((item,i)=>checked[i]&&isCorrect(item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)).length;
+  const scoreCount=topic.exercises.filter((item,i)=>checked[i]&&isCorrect(selectionOnly?answers[i]:item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)).length;
   const submit=()=>{if(answerValue.trim())setChecked(current=>current.map((value,i)=>i===index?true:value))};
   const next=()=>{const nextIndex=topic.exercises.findIndex((_,i)=>i>index&&!checked[i]);if(nextIndex>=0){setIndex(nextIndex);return;}const firstOpen=checked.findIndex(value=>!value);if(firstOpen>=0){setIndex(firstOpen);return;}const final=Math.round(scoreCount/topic.exercises.length*100);save(recordScore(progress,topic.id,final));setDone(true)};
   const reset=()=>{setIndex(0);setAnswers(topic.exercises.map(()=>''));setOrders(topic.exercises.map(()=>[]));setChecked(topic.exercises.map(()=>false));setDone(false)};
@@ -129,10 +130,10 @@ function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:strin
   return <main className="practice-page">
     <div className="practice-top"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>× Exit</button><div><span>{topic.title}</span><div className="practice-bar"><i style={{width:`${checked.filter(Boolean).length/topic.exercises.length*100}%`}}/></div></div><strong>{checked.filter(Boolean).length} / {topic.exercises.length} answered</strong></div>
     <div className="practice-workspace">
-    <aside className="question-list" aria-label="Question list"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>All questions</h2><span>Select any question</span></div>{topic.exercises.map((item,i)=><button key={item.id} className={`${i===index?'active':''} ${checked[i]?'answered':''}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined}><span>{checked[i]?(isCorrect(item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)?'✓':'×'):i+1}</span><span><strong>{item.type.replaceAll('-',' ')}</strong><small>{item.prompt}</small></span></button>)}</aside>
+    <aside className="question-list" aria-label="Question list"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>All questions</h2><span>Select any question</span></div>{topic.exercises.map((item,i)=><button key={item.id} className={`${i===index?'active':''} ${checked[i]?'answered':''}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined}><span>{checked[i]?(isCorrect(selectionOnly?answers[i]:item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)?'✓':'×'):i+1}</span><span><strong>{selectionOnly?'pick one option':item.type.replaceAll('-',' ')}</strong><small>{item.prompt}</small></span></button>)}</aside>
     <section className="question-card">
-      <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div><div className="question-type">{exercise.id.endsWith('-01')&&topic.category==='grammar'?'Select the correct tense':exercise.type.replace('-',' ')}</div><h1>{exercise.prompt}</h1>
-      <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose}/>
+      <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div><div className="question-type">{selectionOnly?(exercise.id.endsWith('-01')?'Select the correct tense':'Pick one option'):exercise.type.replace('-',' ')}</div><h1>{exercise.prompt}</h1>
+      <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose} forceOptions={selectionOnly}/>
       {checked[index]&&<div className={`feedback ${correct?'correct':'incorrect'}`} role="status"><strong>{correct?'✓ Correct':'Not quite yet'}</strong><p>{exercise.answer.explanation}</p>{!correct&&<p className="answer-line">Answer: {exercise.answer.values[0]}</p>}</div>}
       <div className="question-actions">{!checked[index]?<button className="button primary" disabled={!answerValue.trim()} onClick={submit}>Check answer</button>:<button className="button primary" onClick={next}>{checked.every(Boolean)?'See result':'Next unanswered'} →</button>}</div>
     </section>
@@ -140,8 +141,8 @@ function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:strin
   </main>;
 }
 
-function ExerciseInput({exercise,input,setInput,selected,setSelected,checked,choose}:{exercise:Exercise;input:string;setInput:(v:string)=>void;selected:string[];setSelected:(v:string[])=>void;checked:boolean;choose:(v:string)=>void}) {
-  if(exercise.type==='multiple-choice'||exercise.type==='matching')return <div className="option-list">{exercise.options?.map((option,i)=><button disabled={checked} className={input===option?'selected':''} onClick={()=>choose(option)} key={option}><span>{String.fromCharCode(65+i)}</span>{option}</button>)}</div>;
+function ExerciseInput({exercise,input,setInput,selected,setSelected,checked,choose,forceOptions=false}:{exercise:Exercise;input:string;setInput:(v:string)=>void;selected:string[];setSelected:(v:string[])=>void;checked:boolean;choose:(v:string)=>void;forceOptions?:boolean}) {
+  if(forceOptions||exercise.type==='multiple-choice'||exercise.type==='matching')return <div className="option-list">{exercise.options?.map((option,i)=><button disabled={checked} className={input===option?'selected':''} onClick={()=>choose(option)} key={`${option}-${i}`}><span>{String.fromCharCode(65+i)}</span>{option}</button>)}</div>;
   if(exercise.type==='ordering')return <div><div className="order-answer">{selected.length?selected.map((token,i)=><button disabled={checked} key={i} onClick={()=>setSelected(selected.filter((_,j)=>j!==i))}>{token}</button>):<span>Select words to build the sentence</span>}</div><div className="token-list">{exercise.tokens?.map((token,i)=>{const availableOccurrence=exercise.tokens!.slice(0,i+1).filter(t=>t===token).length;const used=selected.filter(t=>t===token).length;return <button disabled={checked||used>=availableOccurrence} key={i} onClick={()=>setSelected([...selected,token])}>{token}</button>})}</div></div>;
   return <label className="answer-input"><span>Your answer</span><input disabled={checked} value={input} onChange={e=>setInput(e.target.value)} placeholder={exercise.type==='gap-fill'||exercise.type==='short-answer'?'Type the missing word or phrase':'Write the complete corrected sentence'}/></label>;
 }

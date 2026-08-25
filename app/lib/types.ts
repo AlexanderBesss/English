@@ -34,9 +34,9 @@ export interface TopicSeed {
   id: string; title: string; category: CategoryId; level?: 'B1+' | 'B2'; minutes?: number;
   summary: string; keywords: string[]; focus: string; correct: string; wrong: string;
   question: string; choices: string[]; answer: string; gap: string; gapAnswer: string;
+  gapChoices?: string[];
   transform: string; transformAnswer: string; prerequisite?: string; transcript?: string;
   table?: { headers: string[]; rows: string[][] };
 }
 export interface TopicProgress { completed: boolean; bestScore: number; attempts: number; bookmarked: boolean }
 export interface ProgressState { version: 1; topics: Record<string, TopicProgress>; lastOpened?: string }
-
