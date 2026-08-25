@@ -72,7 +72,7 @@ function QuickCheck({exercise,number}:{exercise:Exercise;number:number}) {
   </aside>;
 }
 
-function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;navigate:(to:string)=>void;progress:ProgressState;save:(p:ProgressState)=>void;progressHydrated:boolean}) {
+function Lesson({topic,progress,save,progressHydrated}:{topic:Topic;progress:ProgressState;save:(p:ProgressState)=>void;progressHydrated:boolean}) {
   const p=topicProgress(progress,topic.id);
   useEffect(()=>{if(progressHydrated&&progress.lastOpened!==topic.id){const timer=window.setTimeout(()=>save({...progress,lastOpened:topic.id}),0);return()=>window.clearTimeout(timer)}},[progress,progressHydrated,save,topic.id]);
   const [transcriptOpen,setTranscriptOpen]=useState(false);
@@ -97,7 +97,6 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
       </article>
       <aside className="lesson-sidebar"><strong>In this lesson</strong>{outline.map((item,index)=><a href={`#${item.id}`} key={item.id}><span>{String(index+1).padStart(2,'0')}</span>{item.label}</a>)}<div className="sidebar-score"><small>Your best score</small><b>{p.attempts?`${p.bestScore}%`:'Not attempted'}</b></div></aside>
     </div>
-    <section className="practice-cta"><div><p className="eyebrow">Ready to check your understanding?</p><h2>{topic.exercises.length} questions. Instant feedback.</h2></div><button className="button primary" onClick={()=>navigate(`/practice/${topic.id}`)}>Start practice <span>→</span></button></section>
   </main>;
 }
 
@@ -149,8 +148,8 @@ export default function CourseApp() {
   else if(path==='/reference/irregular-verbs')content=<IrregularReferencePage navigate={navigate}/>;
   else if(path==='/reference/review')content=<ReferenceReviewPage navigate={navigate}/>;
   else if(path.startsWith('/reference/guide/'))content=<GeneralReferencePage guideId={path.split('/')[3]} navigate={navigate}/>;
-  else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} navigate={navigate} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
+  else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
   else if(path.startsWith('/practice/')){const topic=getTopic(path.split('/')[2]);content=topic?<Practice topic={topic} navigate={navigate} progress={progress} save={save}/>:<NotFound navigate={navigate}/>;}
   else content=<NotFound navigate={navigate}/>;
-  return <><Header path={path} navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div><footer><span>Fluent Path</span><p>English that takes you somewhere.</p><span>B1 → B2</span></footer></>;
+  return <><Header path={path} navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div></>;
 }
