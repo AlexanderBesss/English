@@ -5,7 +5,7 @@ import './globals.css';
 const sans = DM_Sans({ variable: '--font-sans', subsets: ['latin'] });
 const serif = Lora({ variable: '--font-serif', subsets: ['latin'], style: ['normal', 'italic'] });
 const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'http://localhost:3000';
-const socialImage = new URL('/og.png', siteOrigin).toString();
+const socialImage = `${siteOrigin.replace(/\/$/, '')}/og.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),

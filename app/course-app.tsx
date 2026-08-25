@@ -10,8 +10,8 @@ import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
 
 function useRoute() {
   const [path,setPath]=useState('/');
-  useEffect(()=>{ const sync=()=>setPath(window.location.pathname); sync(); window.addEventListener('popstate',sync); return()=>window.removeEventListener('popstate',sync); },[]);
-  const navigate=(to:string)=>{ window.history.pushState({},'',to); setPath(to); window.scrollTo({top:0,behavior:'smooth'}); };
+  useEffect(()=>{ const sync=()=>setPath(new URLSearchParams(window.location.search).get('route')??'/'); sync(); window.addEventListener('popstate',sync); return()=>window.removeEventListener('popstate',sync); },[]);
+  const navigate=(to:string)=>{ const url=new URL(window.location.href); if(to==='/')url.searchParams.delete('route');else url.searchParams.set('route',to);url.hash='';window.history.pushState({},'',url);setPath(to);window.scrollTo({top:0,behavior:'smooth'}); };
   return {path,navigate};
 }
 
