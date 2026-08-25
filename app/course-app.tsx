@@ -48,12 +48,11 @@ function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate
 
 function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
   const tenseTopics=TENSE_LESSON_IDS.map(id=>getTopic(id)).filter((topic):topic is Topic=>Boolean(topic));
-  const isReady=(topic:Topic)=>!topic.prerequisite||topicProgress(progress,topic.prerequisite).completed;
   return <main>
     <section className="tense-path-section" aria-labelledby="tense-path-title">
-      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div><p>Start with the tense system, then choose the contrast you need. Every lesson includes examples and 50 practice questions.</p></div>
-      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);const ready=isReady(topic);return <article className="tense-lesson-row" key={topic.id}>
-        <div className="tense-select"><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span><span className="lesson-status">{p.completed?'Completed':p.attempts?`Best ${p.bestScore}%`:ready?'Ready':'Builds on lesson 1'}</span></div>
+      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div></div>
+      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);return <article className="tense-lesson-row" key={topic.id}>
+        <div className="tense-select"><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span></div>
         <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>{topic.exercises.length} questions →</button></div>
       </article>})}</div>
     </section>
