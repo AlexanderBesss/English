@@ -134,6 +134,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .example-box>.listen-button{position:absolute;right:16px;top:16px}
 .speakable-example{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;margin:9px 0}
 .tense-examples .speakable-example p{font-family:var(--font-serif);font-size:16px;margin:0;padding-left:13px;border-left:3px solid var(--coral)}
+.tense-examples .speakable-example strong{color:var(--card-accent,var(--coral));font-family:var(--font-sans);font-size:.9em;font-weight:900}
 .comparison-choices .speakable-example p{margin:8px 0}
 .guide-examples .speakable-example{padding:7px 0;border-bottom:1px solid var(--line)}
 .guide-examples .speakable-example:last-child{border-bottom:0}

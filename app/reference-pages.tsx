@@ -55,6 +55,31 @@ const tenseTimelineCaptions:Record<string,string>={
   'future-perfect-continuous':'duration continuing to a future point'
 };
 
+const tenseExampleHighlights:Record<string,string[]>={
+  'present-simple':['does not deploy','returns','closes','runs','Does','walk','run'],
+  'present-continuous':['is not updating','Are you reviewing','is migrating','am reviewing','are working','is talking'],
+  'present-perfect':['Have you ever visited','has not reached','has detected','Have you merged','have deployed','have finished'],
+  'present-perfect-continuous':['has not been responding','Have you been monitoring','have been investigating','has been dropping','have been waiting','has been raining'],
+  'past-simple':['did not complete','switched','failed','opened','moved','found','restore','Did'],
+  'past-continuous':['was not writing','Were the workers processing','were processing','was reviewing','was cooking','were still travelling'],
+  'past-perfect':['had not finished','Had the access token expired','had already timed out','had broken','had left','had not flown'],
+  'past-perfect-continuous':['had not been running','Had you been testing','had been monitoring','had been running','had been driving','had been studying'],
+  'future-simple':['will probably improve','will not merge','Will the pipeline notify','will work','I’ll carry','I’ll open'],
+  'future-continuous':['will not be using','Will the team be deploying','will be migrating','will be monitoring','will be flying','Will you be using'],
+  'future-perfect':['will not have resolved','Will the pipeline have finished','will have completed','will have finished','will have left'],
+  'future-perfect-continuous':['will not have been running','Will the team have been maintaining','will have been maintaining','will have been running','will have been teaching','will have been travelling']
+};
+
+const escapeRegExp=(value:string)=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+
+function EmphasizedExample({text,terms}:{text:string;terms:string[]}){
+  const ordered=[...terms].sort((a,b)=>b.length-a.length);
+  if(!ordered.length)return <>{text}</>;
+  const matcher=new RegExp(`(${ordered.map(escapeRegExp).join('|')})`,'gi');
+  const emphasized=new Set(ordered.map(term=>term.toLowerCase()));
+  return <>{text.split(matcher).map((part,index)=>emphasized.has(part.toLowerCase())?<strong key={`${part}-${index}`}>{part}</strong>:part)}</>;
+}
+
 function TenseTimeline({id}:{id:string}){
   return <div className="tense-time-visual" data-tense={id} aria-hidden="true"><div className="tense-timeline-labels"><span>Past</span><b>Now</b><span>Future</span></div><div className="tense-timeline-track"><i/><span className="tense-timeline-connector"/><span className="tense-timeline-duration"/><span className="tense-timeline-event primary"/><span className="tense-timeline-event secondary"/><em className="tense-timeline-now"/></div><small>{tenseTimelineCaptions[id]}</small></div>;
 }
@@ -117,7 +142,7 @@ export function TensesReferencePage({navigate}:{navigate:Navigate}){
         <div className="library-title"><div><h2>{mode==='review'?'Tenses to review':'12 tense forms'}</h2><p>Positive · Negative · Question · Viewpoint · Common mistake</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search a form, meaning or example…" aria-label="Search English tenses"/></label></div>
         <div className="tense-filters" aria-label="Filter tenses by time">{(['All','Present','Past','Future'] as const).map(option=><button key={option} className={time===option?'active':''} aria-pressed={time===option} onClick={()=>setTime(option)}>{option}</button>)}</div>
         <p className="results-count">{filtered.length} {filtered.length===1?'tense':'tenses'}</p>
-        <div className="tense-grid enriched">{filtered.map(tense=>{const open=expanded.includes(tense.id),key=keyFor('tenses',tense.id),mark=review[key],examples=examplesFor(tense.id,tense.examples);return <article className={`tense-card ${tense.time.toLowerCase()}`} key={tense.id}><TenseTimeline id={tense.id}/><div className="tense-card-top"><span>{tense.time}</span><small>{tense.name.includes('perfect')?'Perfect aspect':'Core form'}</small></div><h2>{tense.name}</h2><div className="tense-form"><small>Positive form</small><strong>{tense.form}</strong></div><p>{tense.use}</p><p className="viewpoint"><strong>Viewpoint:</strong> {tense.viewpoint}</p><div className="signal-list" aria-label="Common clues, not fixed rules">{tense.signalWords.map(word=><span key={word}>{word}</span>)}</div><small className="clue-note">Common clues—not fixed rules</small><div className="tense-examples"><small>Examples</small>{examples.map(example=><div className="speakable-example" key={example}><p>{example}</p><SpeechButton text={example}/></div>)}</div><button className="details-toggle" onClick={()=>setExpanded(open?expanded.filter(id=>id!==tense.id):[...expanded,tense.id])} aria-expanded={open}>{open?'Hide details':'Show questions, negatives & mistakes'}</button>{open&&<div className="tense-details"><p><strong>Negative</strong>{tense.negative}</p><p><strong>Question</strong>{tense.question}</p><p><strong>Compare</strong>{tense.contrast}</p><div className="micro-mistake"><span>× {tense.mistake.wrong}</span><span>✓ {tense.mistake.right}</span></div><RecallCheck prompt={`Say or write the positive pattern for ${tense.name}.`} answer={tense.form}/></div>}<ReviewControls id={key} mark={mark} update={update}/></article>})}</div>
+        <div className="tense-grid enriched">{filtered.map(tense=>{const open=expanded.includes(tense.id),key=keyFor('tenses',tense.id),mark=review[key],examples=examplesFor(tense.id,tense.examples),highlightTerms=tenseExampleHighlights[tense.id]??[];return <article className={`tense-card ${tense.time.toLowerCase()}`} key={tense.id}><TenseTimeline id={tense.id}/><div className="tense-card-top"><span>{tense.time}</span><small>{tense.name.includes('perfect')?'Perfect aspect':'Core form'}</small></div><h2>{tense.name}</h2><div className="tense-form"><small>Positive form</small><strong>{tense.form}</strong></div><p>{tense.use}</p><p className="viewpoint"><strong>Viewpoint:</strong> {tense.viewpoint}</p><div className="signal-list" aria-label="Common clues, not fixed rules">{tense.signalWords.map(word=><span key={word}>{word}</span>)}</div><small className="clue-note">Common clues—not fixed rules</small><div className="tense-examples"><small>Examples</small>{examples.map(example=><div className="speakable-example" key={example}><p><EmphasizedExample text={example} terms={highlightTerms}/></p><SpeechButton text={example}/></div>)}</div><button className="details-toggle" onClick={()=>setExpanded(open?expanded.filter(id=>id!==tense.id):[...expanded,tense.id])} aria-expanded={open}>{open?'Hide details':'Show questions, negatives & mistakes'}</button>{open&&<div className="tense-details"><p><strong>Negative</strong>{tense.negative}</p><p><strong>Question</strong>{tense.question}</p><p><strong>Compare</strong>{tense.contrast}</p><div className="micro-mistake"><span>× {tense.mistake.wrong}</span><span>✓ {tense.mistake.right}</span></div><RecallCheck prompt={`Say or write the positive pattern for ${tense.name}.`} answer={tense.form}/></div>}<ReviewControls id={key} mark={mark} update={update}/></article>})}</div>
         {!filtered.length&&<div className="empty-state"><strong>Nothing here yet.</strong><p>{mode==='review'?'Mark a tense Hard, Unsure or Saved to add it to review.':'Try a broader search or another time.'}</p></div>}
       </>}
     </section><button className="floating-back" onClick={()=>navigate('/reference')}>← All references</button>
