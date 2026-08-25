@@ -40,6 +40,25 @@ const referenceVisuals:Record<string,{kicker:string;main:string;detail:string}>=
   'phrase-bank':{kicker:'READY TO USE',main:'“In my view…”',detail:'start with confidence'}
 };
 
+const tenseTimelineCaptions:Record<string,string>={
+  'present-simple':'repeated around now',
+  'present-continuous':'in progress around now',
+  'present-perfect':'past event connected to now',
+  'present-perfect-continuous':'duration continuing to now',
+  'past-simple':'completed before now',
+  'past-continuous':'in progress at a past point',
+  'past-perfect':'completed before another past point',
+  'past-perfect-continuous':'duration leading to a past point',
+  'future-simple':'a point after now',
+  'future-continuous':'in progress at a future point',
+  'future-perfect':'complete before a future deadline',
+  'future-perfect-continuous':'duration continuing to a future point'
+};
+
+function TenseTimeline({id}:{id:string}){
+  return <div className="tense-time-visual" data-tense={id} aria-hidden="true"><div className="tense-timeline-labels"><span>Past</span><b>Now</b><span>Future</span></div><div className="tense-timeline-track"><i/><span className="tense-timeline-connector"/><span className="tense-timeline-duration"/><span className="tense-timeline-event primary"/><span className="tense-timeline-event secondary"/><em className="tense-timeline-now"/></div><small>{tenseTimelineCaptions[id]}</small></div>;
+}
+
 function ReferenceNav({current,navigate}:{current?:string;navigate:Navigate}){
   const options=[{id:'tenses',label:'Tenses',path:'/reference/tenses'},{id:'irregular-verbs',label:'Irregular verbs',path:'/reference/irregular-verbs'},...referenceGuides.map(g=>({id:g.id,label:g.shortTitle,path:`/reference/guide/${g.id}`}))];
   return <nav className="reference-nav expanded" aria-label="Reference categories">{options.map(option=><button key={option.id} className={current===option.id?'active':''} aria-current={current===option.id?'page':undefined} onClick={()=>navigate(option.path)}>{option.label}</button>)}</nav>;
@@ -98,7 +117,7 @@ export function TensesReferencePage({navigate}:{navigate:Navigate}){
         <div className="library-title"><div><h2>{mode==='review'?'Tenses to review':'12 tense forms'}</h2><p>Positive · Negative · Question · Viewpoint · Common mistake</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search a form, meaning or example…" aria-label="Search English tenses"/></label></div>
         <div className="tense-filters" aria-label="Filter tenses by time">{(['All','Present','Past','Future'] as const).map(option=><button key={option} className={time===option?'active':''} aria-pressed={time===option} onClick={()=>setTime(option)}>{option}</button>)}</div>
         <p className="results-count">{filtered.length} {filtered.length===1?'tense':'tenses'}</p>
-        <div className="tense-grid enriched">{filtered.map(tense=>{const open=expanded.includes(tense.id),key=keyFor('tenses',tense.id),mark=review[key],examples=examplesFor(tense.id,tense.examples);return <article className={`tense-card ${tense.time.toLowerCase()}`} key={tense.id}><div className="tense-time-visual" aria-hidden="true"><span>Past</span><i/><b>Now</b><i/><span>Future</span></div><div className="tense-card-top"><span>{tense.time}</span><small>{tense.name.includes('perfect')?'Perfect aspect':'Core form'}</small></div><h2>{tense.name}</h2><div className="tense-form"><small>Positive form</small><strong>{tense.form}</strong></div><p>{tense.use}</p><p className="viewpoint"><strong>Viewpoint:</strong> {tense.viewpoint}</p><div className="signal-list" aria-label="Common clues, not fixed rules">{tense.signalWords.map(word=><span key={word}>{word}</span>)}</div><small className="clue-note">Common clues—not fixed rules</small><div className="tense-examples"><small>Examples</small>{examples.map(example=><div className="speakable-example" key={example}><p>{example}</p><SpeechButton text={example}/></div>)}</div><button className="details-toggle" onClick={()=>setExpanded(open?expanded.filter(id=>id!==tense.id):[...expanded,tense.id])} aria-expanded={open}>{open?'Hide details':'Show questions, negatives & mistakes'}</button>{open&&<div className="tense-details"><p><strong>Negative</strong>{tense.negative}</p><p><strong>Question</strong>{tense.question}</p><p><strong>Compare</strong>{tense.contrast}</p><div className="micro-mistake"><span>× {tense.mistake.wrong}</span><span>✓ {tense.mistake.right}</span></div><RecallCheck prompt={`Say or write the positive pattern for ${tense.name}.`} answer={tense.form}/></div>}<ReviewControls id={key} mark={mark} update={update}/></article>})}</div>
+        <div className="tense-grid enriched">{filtered.map(tense=>{const open=expanded.includes(tense.id),key=keyFor('tenses',tense.id),mark=review[key],examples=examplesFor(tense.id,tense.examples);return <article className={`tense-card ${tense.time.toLowerCase()}`} key={tense.id}><TenseTimeline id={tense.id}/><div className="tense-card-top"><span>{tense.time}</span><small>{tense.name.includes('perfect')?'Perfect aspect':'Core form'}</small></div><h2>{tense.name}</h2><div className="tense-form"><small>Positive form</small><strong>{tense.form}</strong></div><p>{tense.use}</p><p className="viewpoint"><strong>Viewpoint:</strong> {tense.viewpoint}</p><div className="signal-list" aria-label="Common clues, not fixed rules">{tense.signalWords.map(word=><span key={word}>{word}</span>)}</div><small className="clue-note">Common clues—not fixed rules</small><div className="tense-examples"><small>Examples</small>{examples.map(example=><div className="speakable-example" key={example}><p>{example}</p><SpeechButton text={example}/></div>)}</div><button className="details-toggle" onClick={()=>setExpanded(open?expanded.filter(id=>id!==tense.id):[...expanded,tense.id])} aria-expanded={open}>{open?'Hide details':'Show questions, negatives & mistakes'}</button>{open&&<div className="tense-details"><p><strong>Negative</strong>{tense.negative}</p><p><strong>Question</strong>{tense.question}</p><p><strong>Compare</strong>{tense.contrast}</p><div className="micro-mistake"><span>× {tense.mistake.wrong}</span><span>✓ {tense.mistake.right}</span></div><RecallCheck prompt={`Say or write the positive pattern for ${tense.name}.`} answer={tense.form}/></div>}<ReviewControls id={key} mark={mark} update={update}/></article>})}</div>
         {!filtered.length&&<div className="empty-state"><strong>Nothing here yet.</strong><p>{mode==='review'?'Mark a tense Hard, Unsure or Saved to add it to review.':'Try a broader search or another time.'}</p></div>}
       </>}
     </section><button className="floating-back" onClick={()=>navigate('/reference')}>← All references</button>

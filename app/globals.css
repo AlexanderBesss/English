@@ -168,9 +168,25 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .verb-reference-card>.pronunciation{margin-top:12px}
 
 .tense-card{--card-accent:var(--green);padding-top:25px}.tense-card.past{--card-accent:var(--blue)}.tense-card.future{--card-accent:var(--coral)}
-.tense-time-visual{height:58px;margin:-25px -25px 22px;padding:0 22px;display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:9px;background:color-mix(in srgb,var(--card-accent) 13%,var(--raised));color:var(--card-accent);font-size:9px;text-transform:uppercase;letter-spacing:.11em;font-weight:900}
-.tense-time-visual i{height:1px;background:currentColor;opacity:.38;position:relative}.tense-time-visual i:after{content:"";position:absolute;right:-1px;top:-2px;width:5px;height:5px;border-radius:50%;background:currentColor}
-.tense-time-visual b{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:var(--card-accent);color:#fff;font-size:8px}
+.tense-time-visual{height:92px;margin:-25px -25px 22px;padding:12px 22px 9px;background:color-mix(in srgb,var(--card-accent) 13%,var(--raised));color:var(--card-accent);font-size:9px;text-transform:uppercase;letter-spacing:.11em;font-weight:900}
+.tense-timeline-labels{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}.tense-timeline-labels span:last-child{text-align:right}.tense-timeline-labels b{font-size:8px;letter-spacing:.08em}
+.tense-timeline-track{height:27px;position:relative;margin-top:1px}.tense-timeline-track>i{position:absolute;left:0;right:0;top:12px;height:2px;background:currentColor;opacity:.25}.tense-timeline-track>i:before,.tense-timeline-track>i:after{content:"";position:absolute;top:-2px;width:6px;height:6px;border-radius:50%;background:currentColor}.tense-timeline-track>i:before{left:0}.tense-timeline-track>i:after{right:0}
+.tense-timeline-now{position:absolute;left:50%;top:5px;width:2px;height:16px;transform:translateX(-50%);background:color-mix(in srgb,var(--card-accent) 35%,var(--raised));z-index:2}.tense-timeline-event{display:none;position:absolute;top:6px;width:14px;height:14px;margin-left:-7px;border:3px solid color-mix(in srgb,var(--card-accent) 18%,var(--raised));border-radius:50%;background:var(--card-accent);box-shadow:0 0 0 1px var(--card-accent);z-index:4}.tense-timeline-event.secondary{background:var(--raised);border-color:var(--raised)}
+.tense-timeline-duration{display:none;position:absolute;top:8px;height:10px;border-radius:99px;background:var(--card-accent);opacity:.82;z-index:3}.tense-timeline-duration:after{content:"";position:absolute;right:-1px;top:2px;border-left:5px solid var(--raised);border-top:3px solid transparent;border-bottom:3px solid transparent}.tense-timeline-connector{display:none;position:absolute;top:12px;height:0;border-top:2px dashed var(--card-accent);opacity:.75;z-index:2}
+.tense-time-visual>small{display:block;text-align:center;font-size:8px;letter-spacing:.09em;line-height:1.2;opacity:.82}
+.tense-time-visual[data-tense="present-simple"] .tense-timeline-duration{display:block;left:34%;width:32%;height:0;top:12px;border-top:3px dotted var(--card-accent);background:transparent}.tense-time-visual[data-tense="present-simple"] .tense-timeline-duration:after{display:none}.tense-time-visual[data-tense="present-simple"] .primary{display:block;left:39%}.tense-time-visual[data-tense="present-simple"] .secondary{display:block;left:61%}
+.tense-time-visual[data-tense="present-continuous"] .tense-timeline-duration{display:block;left:34%;width:32%}
+.tense-time-visual[data-tense="present-perfect"] .primary{display:block;left:24%}.tense-time-visual[data-tense="present-perfect"] .tense-timeline-connector{display:block;left:25%;width:25%}
+.tense-time-visual[data-tense="present-perfect-continuous"] .tense-timeline-duration{display:block;left:18%;width:32%}
+.tense-time-visual[data-tense^="present-"] .tense-timeline-now{width:4px;height:20px;top:3px;background:var(--card-accent)}
+.tense-time-visual[data-tense="past-simple"] .primary{display:block;left:25%}
+.tense-time-visual[data-tense="past-continuous"] .tense-timeline-duration{display:block;left:17%;width:25%}.tense-time-visual[data-tense="past-continuous"] .secondary{display:block;left:32%}
+.tense-time-visual[data-tense="past-perfect"] .primary{display:block;left:14%}.tense-time-visual[data-tense="past-perfect"] .secondary{display:block;left:38%}.tense-time-visual[data-tense="past-perfect"] .tense-timeline-connector{display:block;left:15%;width:23%}
+.tense-time-visual[data-tense="past-perfect-continuous"] .tense-timeline-duration{display:block;left:10%;width:25%}.tense-time-visual[data-tense="past-perfect-continuous"] .secondary{display:block;left:39%}.tense-time-visual[data-tense="past-perfect-continuous"] .tense-timeline-connector{display:block;left:35%;width:4%}
+.tense-time-visual[data-tense="future-simple"] .primary{display:block;left:73%}
+.tense-time-visual[data-tense="future-continuous"] .tense-timeline-duration{display:block;left:63%;width:25%}.tense-time-visual[data-tense="future-continuous"] .secondary{display:block;left:75%}
+.tense-time-visual[data-tense="future-perfect"] .primary{display:block;left:72%}.tense-time-visual[data-tense="future-perfect"] .secondary{display:block;left:86%}.tense-time-visual[data-tense="future-perfect"] .tense-timeline-connector{display:block;left:50%;width:36%}
+.tense-time-visual[data-tense="future-perfect-continuous"] .tense-timeline-duration{display:block;left:50%;width:36%}.tense-time-visual[data-tense="future-perfect-continuous"] .secondary{display:block;left:86%}
 .tense-card .tense-form{border-left:4px solid var(--card-accent);background:color-mix(in srgb,var(--card-accent) 8%,var(--paper))}
 .tense-card .viewpoint{border-color:var(--card-accent)}
 
