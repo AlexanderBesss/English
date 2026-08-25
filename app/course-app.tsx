@@ -31,13 +31,14 @@ function useTheme(){
   return {theme,toggle};
 }
 
-function Header({navigate,progress,theme,toggleTheme}:{navigate:(to:string)=>void;progress:ProgressState;theme:Theme;toggleTheme:()=>void}) {
+function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate:(to:string)=>void;progress:ProgressState;theme:Theme;toggleTheme:()=>void}) {
+  const active=path.startsWith('/reference')?'reference':path==='/progress'?'progress':'learn';
   return <header className="app-header">
     <button className="brand" onClick={()=>navigate('/')}><span className="brand-mark">FP</span><span>Fluent Path</span></button>
     <nav aria-label="Main navigation">
-      <button onClick={()=>navigate('/')}>Learn</button>
-      <button onClick={()=>navigate('/reference')}>Reference</button>
-      <button onClick={()=>navigate('/progress')}>Progress</button>
+      <button className={active==='learn'?'active':''} aria-current={active==='learn'?'page':undefined} onClick={()=>navigate('/')}>Learn</button>
+      <button className={active==='reference'?'active':''} aria-current={active==='reference'?'page':undefined} onClick={()=>navigate('/reference')}>Reference</button>
+      <button className={active==='progress'?'active':''} aria-current={active==='progress'?'page':undefined} onClick={()=>navigate('/progress')}>Progress</button>
     </nav>
     <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme==='light'?'dark':'light'} mode`} title={`Switch to ${theme==='light'?'dark':'light'} mode`}><span aria-hidden="true">{theme==='light'?'☾':'☀'}</span><small>{theme==='light'?'Dark':'Light'}</small></button><div className="header-progress" aria-label={`${completionPercent(progress,topics.length)} percent complete`}><span>{completionPercent(progress,topics.length)}%</span><i><b style={{width:`${completionPercent(progress,topics.length)}%`}}/></i></div></div>
   </header>;
@@ -176,5 +177,5 @@ export default function CourseApp() {
   else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} navigate={navigate} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
   else if(path.startsWith('/practice/')){const topic=getTopic(path.split('/')[2]);content=topic?<Practice topic={topic} navigate={navigate} progress={progress} save={save}/>:<NotFound navigate={navigate}/>;}
   else content=<NotFound navigate={navigate}/>;
-  return <><Header navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div><footer><span>Fluent Path</span><p>English that takes you somewhere.</p><span>B1 → B2</span></footer></>;
+  return <><Header path={path} navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div><footer><span>Fluent Path</span><p>English that takes you somewhere.</p><span>B1 → B2</span></footer></>;
 }

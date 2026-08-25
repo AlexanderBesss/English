@@ -11,7 +11,7 @@ button { font:inherit; }
 .brand-mark { width:36px; height:36px; display:grid; place-items:center; background:var(--ink); color:white; border-radius:50%; font-size:11px; letter-spacing:.08em; }
 nav { display:flex; gap:34px; font-size:14px; font-weight:600; }
 nav a,nav button { padding:27px 0 23px; border:0; border-bottom:3px solid transparent; background:transparent; cursor:pointer; font-weight:600; }
-nav a.active,nav button:first-child { border-color:var(--coral); }
+nav a.active,nav button.active { border-color:var(--coral); }
 .search-button { justify-self:end; border:1px solid rgba(23,50,77,.25); background:transparent; color:var(--ink); border-radius:99px; padding:9px 16px; cursor:pointer; }
 .hero { min-height:600px; display:grid; grid-template-columns:1.2fr .8fr; gap:70px; align-items:center; padding:80px clamp(24px,7vw,112px); border-bottom:1px solid rgba(23,50,77,.15); overflow:hidden; }
 .eyebrow { text-transform:uppercase; letter-spacing:.17em; font-weight:800; font-size:11px; color:var(--coral); margin:0 0 17px; }
