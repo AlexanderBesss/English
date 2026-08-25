@@ -6,6 +6,7 @@ const sans = DM_Sans({ variable: '--font-sans', subsets: ['latin'] });
 const serif = Lora({ variable: '--font-serif', subsets: ['latin'], style: ['normal', 'italic'] });
 const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'http://localhost:3000';
 const socialImage = `${siteOrigin.replace(/\/$/, '')}/og.png`;
+const themeScript = `(function(){try{var saved=localStorage.getItem('fluent-path-theme');var theme=saved==='dark'||saved==='light'?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=theme;}catch(e){}})();`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className={`${sans.variable} ${serif.variable}`}><a className="skip-link" href="#main-content">Skip to content</a>{children}</body></html>;
+  return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{__html:themeScript}}/></head><body className={`${sans.variable} ${serif.variable}`}><a className="skip-link" href="#main-content">Skip to content</a>{children}</body></html>;
 }

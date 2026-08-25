@@ -23,7 +23,15 @@ function useProgress() {
   return {progress,save,hydrated};
 }
 
-function Header({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
+type Theme='light'|'dark';
+function useTheme(){
+  const [theme,setTheme]=useState<Theme>('light');
+  useEffect(()=>{const current=document.documentElement.dataset.theme==='dark'?'dark':'light';const timer=window.setTimeout(()=>setTheme(current),0);return()=>window.clearTimeout(timer)},[]);
+  const toggle=()=>setTheme(current=>{const next=current==='light'?'dark':'light';document.documentElement.dataset.theme=next;localStorage.setItem('fluent-path-theme',next);return next});
+  return {theme,toggle};
+}
+
+function Header({navigate,progress,theme,toggleTheme}:{navigate:(to:string)=>void;progress:ProgressState;theme:Theme;toggleTheme:()=>void}) {
   return <header className="app-header">
     <button className="brand" onClick={()=>navigate('/')}><span className="brand-mark">FP</span><span>Fluent Path</span></button>
     <nav aria-label="Main navigation">
@@ -31,7 +39,7 @@ function Header({navigate,progress}:{navigate:(to:string)=>void;progress:Progres
       <button onClick={()=>navigate('/reference')}>Reference</button>
       <button onClick={()=>navigate('/progress')}>Progress</button>
     </nav>
-    <div className="header-progress" aria-label={`${completionPercent(progress,topics.length)} percent complete`}><span>{completionPercent(progress,topics.length)}%</span><i><b style={{width:`${completionPercent(progress,topics.length)}%`}}/></i></div>
+    <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme==='light'?'dark':'light'} mode`} title={`Switch to ${theme==='light'?'dark':'light'} mode`}><span aria-hidden="true">{theme==='light'?'☾':'☀'}</span><small>{theme==='light'?'Dark':'Light'}</small></button><div className="header-progress" aria-label={`${completionPercent(progress,topics.length)} percent complete`}><span>{completionPercent(progress,topics.length)}%</span><i><b style={{width:`${completionPercent(progress,topics.length)}%`}}/></i></div></div>
   </header>;
 }
 
@@ -156,6 +164,7 @@ function NotFound({navigate}:{navigate:(to:string)=>void}) {return <main classNa
 export default function CourseApp() {
   const {path,navigate}=useRoute();
   const {progress,save,hydrated:progressHydrated}=useProgress();
+  const {theme,toggle:toggleTheme}=useTheme();
   let content;
   if(path==='/')content=<Dashboard navigate={navigate} progress={progress}/>;
   else if(path==='/reference')content=<ReferenceHubPage navigate={navigate}/>;
@@ -167,5 +176,5 @@ export default function CourseApp() {
   else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} navigate={navigate} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
   else if(path.startsWith('/practice/')){const topic=getTopic(path.split('/')[2]);content=topic?<Practice topic={topic} navigate={navigate} progress={progress} save={save}/>:<NotFound navigate={navigate}/>;}
   else content=<NotFound navigate={navigate}/>;
-  return <><Header navigate={navigate} progress={progress}/><div id="main-content">{content}</div><footer><span>Fluent Path</span><p>English that takes you somewhere.</p><span>B1 → B2</span></footer></>;
+  return <><Header navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div><footer><span>Fluent Path</span><p>English that takes you somewhere.</p><span>B1 → B2</span></footer></>;
 }
