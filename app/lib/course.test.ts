@@ -3,6 +3,8 @@ import { topics } from '../content';
 import { isCorrect, validateTopics } from '../content/shared';
 import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, toggleBookmark } from './progress';
 import { filterTopics } from './search';
+import { referenceGuides } from '../content/reference/guides';
+import { tenseComparisons, tenseReferences } from '../content/grammar/tenses';
 
 describe('course content',()=>{
  it('contains the complete 30-topic path',()=>expect(topics).toHaveLength(30));
@@ -54,3 +56,18 @@ describe('topic filtering',()=>{
  });
 });
 
+describe('reference learning system',()=>{
+ it('covers the planned reference library with unique routes',()=>{
+  expect(referenceGuides.length).toBeGreaterThanOrEqual(12);
+  expect(new Set(referenceGuides.map(guide=>guide.id)).size).toBe(referenceGuides.length);
+  expect(referenceGuides.every(guide=>guide.items.length>=2)).toBe(true);
+ });
+ it('enriches every tense with contrast, production and error support',()=>{
+  expect(tenseReferences).toHaveLength(12);
+  expect(tenseReferences.every(tense=>tense.negative&&tense.question&&tense.viewpoint&&tense.contrast&&tense.mistake.right)).toBe(true);
+  expect(tenseComparisons).toHaveLength(6);
+ });
+ it('gives every reference item an active recall prompt',()=>{
+  expect(referenceGuides.flatMap(guide=>guide.items).every(item=>item.prompt&&item.answer&&item.examples.length)).toBe(true);
+ });
+});

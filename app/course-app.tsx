@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { categoryInfo, categoryOrder, getTopic, topics } from './content';
-import { irregularVerbs } from './content/verbs/irregulars';
-import { tenseReferences } from './content/grammar/tenses';
 import { isCorrect } from './content/shared';
 import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, toggleBookmark, topicProgress } from './lib/progress';
 import { filterTopics } from './lib/search';
 import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
+import { GeneralReferencePage, IrregularReferencePage, ReferenceHubPage, ReferenceReviewPage, TensesReferencePage } from './reference-pages';
 
 function useRoute() {
   const [path,setPath]=useState('/');
@@ -139,46 +138,6 @@ function ExerciseInput({exercise,input,setInput,selected,setSelected,checked,cho
   return <label className="answer-input"><span>Your answer</span><input disabled={checked} value={input} onChange={e=>setInput(e.target.value)} placeholder={exercise.type==='gap-fill'||exercise.type==='short-answer'?'Type the missing word or phrase':'Write the complete corrected sentence'}/></label>;
 }
 
-function ReferenceNav({current,navigate}:{current?:'tenses'|'verbs';navigate:(to:string)=>void}) {
-  return <nav className="reference-nav" aria-label="Reference categories">
-    <button className={current==='tenses'?'active':''} aria-current={current==='tenses'?'page':undefined} onClick={()=>navigate('/reference/tenses')}>English tenses</button>
-    <button className={current==='verbs'?'active':''} aria-current={current==='verbs'?'page':undefined} onClick={()=>navigate('/reference/irregular-verbs')}>Irregular verbs</button>
-  </nav>;
-}
-
-function ReferenceHub({navigate}:{navigate:(to:string)=>void}) {
-  return <main className="reference-page">
-    <section className="reference-hero"><p className="eyebrow">Quick guides</p><h1>English reference,<br/><em>in one place.</em></h1><p>Choose a guide for clear forms, natural examples and the patterns you need while learning or writing.</p></section>
-    <section className="reference-hub"><article><span>01</span><p className="eyebrow">Grammar</p><h2>English tenses</h2><p>Compare all 12 core tense forms by structure, use and time signal.</p><button onClick={()=>navigate('/reference/tenses')}>Explore tenses →</button></article><article><span>02</span><p className="eyebrow">Verb systems</p><h2>Irregular verbs</h2><p>Search essential base, past and participle forms with pronunciation and examples.</p><button onClick={()=>navigate('/reference/irregular-verbs')}>Explore verbs →</button></article></section>
-    <button className="floating-back" onClick={()=>navigate('/')}>← Back to lessons</button>
-  </main>;
-}
-
-function TensesReference({navigate}:{navigate:(to:string)=>void}) {
-  const [query,setQuery]=useState('');
-  const [time,setTime]=useState<'All'|'Present'|'Past'|'Future'>('All');
-  const filtered=tenseReferences.filter(tense=>time==='All'||tense.time===time).filter(tense=>[tense.name,tense.form,tense.use,...tense.signalWords,...tense.examples].join(' ').toLowerCase().includes(query.toLowerCase()));
-  return <main className="reference-page">
-    <section className="reference-hero"><p className="eyebrow">Grammar reference</p><h1>English tenses,<br/><em>made clear.</em></h1><p>Compare form and meaning across the 12 core tenses. Each card gives you the pattern, when to use it and two natural examples.</p></section>
-    <section className="tense-reference-section"><ReferenceNav current="tenses" navigate={navigate}/><div className="library-title"><div><h2>12 tense forms</h2><p>Form · Use · Time signals · Examples</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search a tense, form or example…" aria-label="Search English tenses"/></label></div>
-    <div className="tense-filters" aria-label="Filter tenses by time">{(['All','Present','Past','Future'] as const).map(option=><button key={option} className={time===option?'active':''} aria-pressed={time===option} onClick={()=>setTime(option)}>{option}</button>)}</div>
-    <p className="results-count">{filtered.length} {filtered.length===1?'tense':'tenses'}</p><div className="tense-grid">{filtered.map(tense=><article className={`tense-card ${tense.time.toLowerCase()}`} key={tense.id}><div className="tense-card-top"><span>{tense.time}</span><small>{String(tenseReferences.indexOf(tense)+1).padStart(2,'0')}</small></div><h2>{tense.name}</h2><div className="tense-form"><small>Form</small><strong>{tense.form}</strong></div><p>{tense.use}</p><div className="signal-list">{tense.signalWords.map(word=><span key={word}>{word}</span>)}</div><div className="tense-examples"><small>Examples</small>{tense.examples.map(example=><p key={example}>{example}</p>)}</div></article>)}</div>{!filtered.length&&<div className="empty-state"><strong>No tenses found.</strong><p>Try a broader search or choose another time.</p></div>}</section>
-    <button className="floating-back" onClick={()=>navigate('/reference')}>← All references</button>
-  </main>;
-}
-
-function IrregularReference({navigate}:{navigate:(to:string)=>void}) {
-  const [query,setQuery]=useState('');
-  const filtered=irregularVerbs.filter(v=>Object.values(v).join(' ').toLowerCase().includes(query.toLowerCase()));
-  const speak=(text:string)=>{if('speechSynthesis'in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';window.speechSynthesis.speak(u)}};
-  return <main className="reference-page">
-    <section className="reference-hero"><p className="eyebrow">Foundational reference</p><h1>Irregular verbs,<br/><em>made searchable.</em></h1><p>Review the forms you need most. Search by any form, listen, then notice the verb inside a natural sentence.</p></section>
-    <section className="reference-table-section"><ReferenceNav current="verbs" navigate={navigate}/><div className="library-title"><div><h2>{irregularVerbs.length} essential verbs</h2><p>British pronunciation hints · Natural examples</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search go, went or gone…" aria-label="Search irregular verbs"/></label></div>
-    <div className="table-wrap irregular-table"><table><thead><tr><th>Base form</th><th>Past simple</th><th>Past participle</th><th>Pronunciation & use</th><th></th></tr></thead><tbody>{filtered.map(verb=><tr key={verb.base}><td><strong>{verb.base}</strong></td><td>{verb.past}</td><td>{verb.participle}</td><td><span className="pronunciation">{verb.pronunciation}</span><br/>{verb.example}<small>{verb.note}</small></td><td><button onClick={()=>speak(`${verb.base}, ${verb.past}, ${verb.participle}. ${verb.example}`)} aria-label={`Listen to ${verb.base}`}>🔊</button></td></tr>)}</tbody></table></div></section>
-    <button className="floating-back" onClick={()=>navigate('/reference')}>← All references</button>
-  </main>;
-}
-
 function ProgressPage({progress,save,navigate}:{progress:ProgressState;save:(p:ProgressState)=>void;navigate:(to:string)=>void}) {
   const completed=Object.values(progress.topics).filter(p=>p.completed).length;
   const attempts=Object.values(progress.topics).reduce((sum,p)=>sum+p.attempts,0);
@@ -199,9 +158,11 @@ export default function CourseApp() {
   const {progress,save,hydrated:progressHydrated}=useProgress();
   let content;
   if(path==='/')content=<Dashboard navigate={navigate} progress={progress}/>;
-  else if(path==='/reference')content=<ReferenceHub navigate={navigate}/>;
-  else if(path==='/reference/tenses')content=<TensesReference navigate={navigate}/>;
-  else if(path==='/reference/irregular-verbs')content=<IrregularReference navigate={navigate}/>;
+  else if(path==='/reference')content=<ReferenceHubPage navigate={navigate}/>;
+  else if(path==='/reference/tenses')content=<TensesReferencePage navigate={navigate}/>;
+  else if(path==='/reference/irregular-verbs')content=<IrregularReferencePage navigate={navigate}/>;
+  else if(path==='/reference/review')content=<ReferenceReviewPage navigate={navigate}/>;
+  else if(path.startsWith('/reference/guide/'))content=<GeneralReferencePage guideId={path.split('/')[3]} navigate={navigate}/>;
   else if(path==='/progress')content=<ProgressPage progress={progress} save={save} navigate={navigate}/>;
   else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} navigate={navigate} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
   else if(path.startsWith('/practice/')){const topic=getTopic(path.split('/')[2]);content=topic?<Practice topic={topic} navigate={navigate} progress={progress} save={save}/>:<NotFound navigate={navigate}/>;}
