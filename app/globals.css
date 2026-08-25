@@ -268,3 +268,17 @@ button:disabled{cursor:not-allowed;opacity:.48}
 @media(max-width:900px){.dash-hero{grid-template-columns:1fr}.today-card{max-width:620px}.next-step-grid{grid-template-columns:1fr 1fr}.next-step-card:last-child{grid-column:1/-1}}
 @media(max-width:800px){.app-header .header-actions{grid-column:2;grid-row:1}}
 @media(max-width:620px){.dash-hero{padding-top:44px;padding-bottom:52px}.today-card{padding:24px;box-shadow:9px 10px 0 color-mix(in srgb,var(--ink) 10%,transparent)}.learning-summary{grid-template-columns:1fr 1fr}.learning-summary span:last-child{display:none}.next-steps-section{padding:58px 18px}.next-step-grid{grid-template-columns:1fr}.next-step-card:last-child{grid-column:auto}.library-title{align-items:stretch}.library-toggle{width:100%}.quick-check{padding:21px}.quick-check-heading{display:block}.quick-check-heading>span{display:block;margin-top:8px}}
+
+/* Compact five-column practice board */
+.question-list{padding-bottom:18px}
+.question-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:0 18px}
+.question-grid>button{aspect-ratio:1;display:grid;place-items:center;border:0;background:color-mix(in srgb,var(--blue) 10%,var(--raised));color:var(--ink);font-size:12px;font-weight:900;cursor:pointer}
+.question-grid>button:nth-child(even){background:color-mix(in srgb,var(--blue) 24%,var(--raised))}
+.question-grid>button:hover{position:relative;z-index:1;background:color-mix(in srgb,var(--gold) 35%,var(--raised))}
+.question-grid>button.active{position:relative;z-index:2;box-shadow:inset 0 0 0 3px var(--ink)}
+.question-grid>button.correct{background:var(--green);color:#fff}
+.question-grid>button.incorrect{background:var(--coral);color:#fff}
+[data-theme="dark"] .question-grid>button{color:var(--text)}
+[data-theme="dark"] .question-grid>button.correct,[data-theme="dark"] .question-grid>button.incorrect{color:#fff}
+@media(max-width:800px){.question-list{display:block;width:100%;padding-bottom:14px}.question-list-heading{display:flex;align-items:center;gap:14px;padding:14px 16px}.question-list-heading .eyebrow{display:none}.question-list-heading h2{margin:0;font-size:22px}.question-list-heading>span{margin-left:auto}.question-grid{padding:0 14px}.question-grid>button{min-height:48px;aspect-ratio:auto}}
+@media(max-width:580px){.question-list-heading{display:flex}.question-grid>button{min-height:44px}}
