@@ -105,7 +105,7 @@ export function ReferenceHubPage({navigate}:{navigate:Navigate}){
   ];
   const visible=core.filter(card=>category==='All'||card.category===category);
   return <main className="reference-page">
-    <section className="reference-library"><div className="reference-library-head"><div><p className="eyebrow">Reference library</p><h2>{core.length} focused guides</h2><p>{reviewCount} {reviewCount===1?'item':'items'} waiting in your review list.</p></div>{reviewCount>0&&<button className="button primary" onClick={()=>navigate('/reference/review')}>Review difficult items →</button>}</div>
+    <section className="reference-library"><div className="reference-library-head"><div><p className="eyebrow">Reference library</p><h2>{core.length} focused guides</h2><p>{reviewCount} {reviewCount===1?'item':'items'} waiting in your review list.</p></div></div>
       <div className="reference-category-filters">{categories.map(value=><button key={value} className={category===value?'active':''} onClick={()=>setCategory(value)}>{value}</button>)}</div>
       <div className="reference-hub expanded-hub">{visible.map((card,index)=>{const visual=referenceVisuals[card.id]??{kicker:'REFERENCE',main:'A → B',detail:'see the pattern'};return <article className="reference-library-card" data-guide={card.id} key={card.id} role="link" tabIndex={0} aria-label={`Open ${card.title}`} onClick={()=>navigate(card.path)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();navigate(card.path)}}}>
         <div className="reference-card-visual" aria-hidden="true"><span>{visual.kicker}</span><strong>{visual.main}</strong><i>{visual.detail}</i></div>

@@ -72,7 +72,6 @@ function QuickCheck({exercise,number}:{exercise:Exercise;number:number}) {
 }
 
 function Lesson({topic,progress,save,progressHydrated}:{topic:Topic;progress:ProgressState;save:(p:ProgressState)=>void;progressHydrated:boolean}) {
-  const p=topicProgress(progress,topic.id);
   useEffect(()=>{if(progressHydrated&&progress.lastOpened!==topic.id){const timer=window.setTimeout(()=>save({...progress,lastOpened:topic.id}),0);return()=>window.clearTimeout(timer)}},[progress,progressHydrated,save,topic.id]);
   const [transcriptOpen,setTranscriptOpen]=useState(false);
   const compareId=`${topic.id}-compare`,mistakeId=`${topic.id}-mistake`,listeningId=`${topic.id}-listening`,productionId=`${topic.id}-production`;
@@ -94,7 +93,7 @@ function Lesson({topic,progress,save,progressHydrated}:{topic:Topic;progress:Pro
         {topic.transcript&&<section className="listening-section lesson-block" id={listeningId}><header className="lesson-block-heading"><div className="section-number">{stepNumber(listeningId)}</div><div><p className="eyebrow">Listening practice</p><h2>Listen for the main message</h2></div></header><div className="audio-controls"><SpeechButton text={topic.transcript} label="Play passage" className="passage-button"/><button onClick={()=>setTranscriptOpen(!transcriptOpen)} aria-expanded={transcriptOpen}>{transcriptOpen?'Hide':'Show'} transcript</button></div>{transcriptOpen&&<div className="transcript">{topic.transcript}</div>}</section>}
         <section className="production-card lesson-block" id={productionId}><header className="lesson-block-heading"><div className="section-number">{stepNumber(productionId)}</div><div><p className="eyebrow">Put it into practice</p><h2>Your production task</h2></div></header><p>{topic.production.prompt}</p><details><summary>Show model answer and checklist</summary><blockquote>{topic.production.model}</blockquote><ul>{topic.production.checklist.map(item=><li key={item}>{item}</li>)}</ul></details></section>
       </article>
-      <aside className="lesson-sidebar"><strong>In this lesson</strong>{outline.map((item,index)=><a href={`#${item.id}`} key={item.id}><span>{String(index+1).padStart(2,'0')}</span>{item.label}</a>)}<div className="sidebar-score"><small>Your best score</small><b>{p.attempts?`${p.bestScore}%`:'Not attempted'}</b></div></aside>
+      <aside className="lesson-sidebar"><strong>In this lesson</strong>{outline.map((item,index)=><a href={`#${item.id}`} key={item.id}><span>{String(index+1).padStart(2,'0')}</span>{item.label}</a>)}</aside>
     </div>
   </main>;
 }
