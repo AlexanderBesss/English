@@ -112,3 +112,47 @@ button{color:inherit}.dash-hero{min-height:590px;display:grid;grid-template-colu
 [data-theme="dark"] .covered{background:#050a0e}
 [data-theme="dark"] footer{border-color:var(--line)}
 @media(max-width:580px){.theme-toggle small{display:none}.header-actions{gap:10px}.theme-toggle{width:38px;height:38px;justify-content:center;padding:0}}
+
+/* Interaction and readability polish */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+button{transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+.button{border:0;cursor:pointer;min-height:48px;justify-content:center}
+.button.primary:hover:not(:disabled){background:var(--coral);transform:translateY(-2px);box-shadow:0 8px 20px rgba(23,50,77,.16)}
+button:disabled{cursor:not-allowed;opacity:.48}
+.search-field{border-radius:10px;transition:border-color .18s ease,box-shadow .18s ease}
+.search-field:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 20%,transparent)}
+.topic-card,.tense-card,.comparison-card,.verb-reference-card,.guide-item-card,.reference-hub article{border-radius:10px;overflow:hidden}
+.topic-card,.tense-card,.comparison-card,.verb-reference-card,.guide-item-card{box-shadow:0 1px 0 rgba(23,50,77,.08)}
+.tense-card:hover,.comparison-card:hover,.verb-reference-card:hover,.guide-item-card:hover{box-shadow:0 12px 28px rgba(23,50,77,.09);transform:translateY(-2px)}
+.reference-category-filters button:hover,.reference-mode-tabs button:hover,.guide-actions button:hover,.verb-tools button:hover,.tense-filters button:hover,.review-controls button:hover{border-color:var(--ink)}
+.topic-card-footer button:hover{background:var(--coral);transform:translateX(2px)}
+.listen-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 11px;border:1px solid color-mix(in srgb,var(--ink) 24%,transparent);border-radius:99px;background:var(--raised);color:var(--ink);font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}
+.listen-button:hover{border-color:var(--coral);color:var(--coral);transform:translateY(-1px)}
+.listen-button.playing{background:var(--ink);border-color:var(--ink);color:#fff}
+.listen-icon{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:var(--coral);color:#fff;font-size:8px}
+.listen-button.playing .listen-icon{background:#fff;color:var(--ink)}
+.example-box>.listen-button{position:absolute;right:16px;top:16px}
+.speakable-example{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;margin:9px 0}
+.tense-examples .speakable-example p{font-family:var(--font-serif);font-size:16px;margin:0;padding-left:13px;border-left:3px solid var(--coral)}
+.comparison-choices .speakable-example p{margin:8px 0}
+.guide-examples .speakable-example{padding:7px 0;border-bottom:1px solid var(--line)}
+.guide-examples .speakable-example:last-child{border-bottom:0}
+.guide-examples .speakable-example blockquote{margin:0}
+.passage-button{min-height:48px;padding:12px 18px;background:var(--ink);border-color:var(--ink);color:#fff;border-radius:4px}
+.audio-controls>button:not(.primary):not(.listen-button){border-radius:4px;cursor:pointer}
+[data-theme="dark"] .listen-button{background:#22333e;border-color:#40535f;color:var(--text)}
+[data-theme="dark"] .listen-button.playing,[data-theme="dark"] .passage-button{background:var(--coral);border-color:var(--coral);color:#12202a}
+
+@media(max-width:800px){
+  .app-header{height:auto;min-height:76px;grid-template-columns:1fr auto;padding:12px 18px 0}
+  .app-header nav{display:flex;grid-column:1/-1;gap:4px;overflow-x:auto;margin-top:8px;border-top:1px solid var(--line);scrollbar-width:none}
+  .app-header nav::-webkit-scrollbar{display:none}
+  .app-header nav button{flex:1;min-width:88px;padding:12px 10px 10px}
+  .dash-hero{padding-top:52px}
+}
+@media(max-width:580px){
+  .speakable-example{grid-template-columns:1fr;align-items:start}
+  .speakable-example .listen-button{justify-self:start}
+  .example-box>.listen-button{position:static;margin-top:14px}
+  .topic-card,.tense-card,.comparison-card,.verb-reference-card,.guide-item-card{border-radius:8px}
+}

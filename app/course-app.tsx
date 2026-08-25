@@ -7,6 +7,7 @@ import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_K
 import { filterTopics } from './lib/search';
 import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
 import { GeneralReferencePage, IrregularReferencePage, ReferenceHubPage, ReferenceReviewPage, TensesReferencePage } from './reference-pages';
+import { SpeechButton } from './speech-button';
 
 function useRoute() {
   const [path,setPath]=useState('/');
@@ -95,11 +96,6 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
   const p=topicProgress(progress,topic.id);
   useEffect(()=>{if(progressHydrated&&progress.lastOpened!==topic.id){const timer=window.setTimeout(()=>save({...progress,lastOpened:topic.id}),0);return()=>window.clearTimeout(timer)}},[progress,progressHydrated,save,topic.id]);
   const [transcriptOpen,setTranscriptOpen]=useState(false);
-  const [speechMessage,setSpeechMessage]=useState('');
-  const speak=(text:string)=>{
-    if(!('speechSynthesis' in window)){setSpeechMessage('Speech playback is not supported in this browser. Use the transcript below.');return;}
-    window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(text);utterance.lang='en-GB';window.speechSynthesis.speak(utterance);setSpeechMessage('Playing with your browser voice.');
-  };
   return <main className="lesson-page">
     <div className="lesson-breadcrumb"><button onClick={()=>navigate('/')}>All lessons</button><span>/</span><span>{categoryInfo[topic.category].name}</span></div>
     <section className="lesson-header">
@@ -109,10 +105,10 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
     </section>
     <div className="lesson-layout">
       <article className="lesson-content">
-        {topic.sections.map((section,index)=><section className="lesson-section" id={section.id} key={section.id}><div className="section-number">0{index+1}</div><h2>{section.title}</h2><p>{section.body}</p>{section.examples?.map(ex=><div className="example-box" key={ex.sentence}><span>{ex.label}</span><strong>{ex.sentence}</strong><p>{ex.note}</p><button onClick={()=>speak(ex.sentence)} aria-label={`Listen to: ${ex.sentence}`}>🔊 Listen</button></div>)}</section>)}
+        {topic.sections.map((section,index)=><section className="lesson-section" id={section.id} key={section.id}><div className="section-number">0{index+1}</div><h2>{section.title}</h2><p>{section.body}</p>{section.examples?.map(ex=><div className="example-box" key={ex.sentence}><span>{ex.label}</span><strong>{ex.sentence}</strong><p>{ex.note}</p><SpeechButton text={ex.sentence}/></div>)}</section>)}
         {topic.table&&<section className="lesson-section"><div className="section-number">03</div><h2>Compare the forms</h2><div className="table-wrap"><table><thead><tr>{topic.table.headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{topic.table.rows.map((row,i)=><tr key={i}>{row.map(cell=><td key={cell}>{cell}</td>)}</tr>)}</tbody></table></div></section>}
         <section className="mistake-section"><p className="eyebrow">Common mistake</p><div className="wrong-line"><span>×</span>{topic.mistake.wrong}</div><div className="right-line"><span>✓</span>{topic.mistake.right}</div><p>{topic.mistake.explanation}</p></section>
-        {topic.transcript&&<section className="listening-section"><p className="eyebrow">Listening practice</p><h2>Listen for the main message</h2><div className="audio-controls"><button className="button primary" onClick={()=>speak(topic.transcript!)}>▶ Play passage</button><button onClick={()=>setTranscriptOpen(!transcriptOpen)}>{transcriptOpen?'Hide':'Show'} transcript</button></div><p className="speech-status" role="status">{speechMessage}</p>{transcriptOpen&&<div className="transcript">{topic.transcript}</div>}</section>}
+        {topic.transcript&&<section className="listening-section"><p className="eyebrow">Listening practice</p><h2>Listen for the main message</h2><div className="audio-controls"><SpeechButton text={topic.transcript} label="Play passage" className="passage-button"/><button onClick={()=>setTranscriptOpen(!transcriptOpen)} aria-expanded={transcriptOpen}>{transcriptOpen?'Hide':'Show'} transcript</button></div>{transcriptOpen&&<div className="transcript">{topic.transcript}</div>}</section>}
         <section className="production-card"><p className="eyebrow">Put it into practice</p><h2>Your production task</h2><p>{topic.production.prompt}</p><details><summary>Show model answer and checklist</summary><blockquote>{topic.production.model}</blockquote><ul>{topic.production.checklist.map(item=><li key={item}>{item}</li>)}</ul></details></section>
       </article>
       <aside className="lesson-sidebar"><strong>In this lesson</strong><a href={`#${topic.sections[0].id}`}>Key idea</a><span>Meaning and examples</span><span>Common mistake</span><span>Production task</span><div className="sidebar-score"><small>Your best score</small><b>{p.attempts?`${p.bestScore}%`:'Not attempted'}</b></div></aside>
