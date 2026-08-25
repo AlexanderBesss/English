@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { categoryInfo, categoryOrder, getTopic, topics } from './content';
+import { categoryInfo, getTopic } from './content';
 import { isCorrect } from './content/shared';
-import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, toggleBookmark, topicProgress } from './lib/progress';
-import { filterTopics } from './lib/search';
-import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
+import { EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, toggleBookmark, topicProgress } from './lib/progress';
+import type { Exercise, ProgressState, Topic } from './lib/types';
 import { GeneralReferencePage, IrregularReferencePage, ReferenceHubPage, ReferenceReviewPage, TensesReferencePage } from './reference-pages';
 import { SpeechButton } from './speech-button';
+
+const TENSE_LESSON_IDS=['tense-system','present-perfect','narrative-tenses','future-forms'];
 
 function useRoute() {
   const [path,setPath]=useState('/');
@@ -34,71 +35,44 @@ function useTheme(){
 
 function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate:(to:string)=>void;progress:ProgressState;theme:Theme;toggleTheme:()=>void}) {
   const active=path.startsWith('/reference')?'reference':'learn';
+  const learnerPercent=Math.round(TENSE_LESSON_IDS.filter(id=>topicProgress(progress,id).completed).length/TENSE_LESSON_IDS.length*100);
   return <header className="app-header">
     <button className="brand" onClick={()=>navigate('/')}><span className="brand-mark">FP</span><span>Fluent Path</span></button>
     <nav aria-label="Main navigation">
       <button className={active==='learn'?'active':''} aria-current={active==='learn'?'page':undefined} onClick={()=>navigate('/')}>Learn</button>
       <button className={active==='reference'?'active':''} aria-current={active==='reference'?'page':undefined} onClick={()=>navigate('/reference')}>Reference</button>
     </nav>
-    <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme==='light'?'dark':'light'} mode`} title={`Switch to ${theme==='light'?'dark':'light'} mode`}><span aria-hidden="true">{theme==='light'?'☾':'☀'}</span><small>{theme==='light'?'Dark':'Light'}</small></button><div className="header-progress" aria-label={`${completionPercent(progress,topics.length)} percent complete`}><span>{completionPercent(progress,topics.length)}%</span><i><b style={{width:`${completionPercent(progress,topics.length)}%`}}/></i></div></div>
+    <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme==='light'?'dark':'light'} mode`} title={`Switch to ${theme==='light'?'dark':'light'} mode`}><span aria-hidden="true">{theme==='light'?'☾':'☀'}</span><small>{theme==='light'?'Dark':'Light'}</small></button><div className="header-progress" aria-label={`${learnerPercent} percent complete`}><span>{learnerPercent}%</span><i><b style={{width:`${learnerPercent}%`}}/></i></div></div>
   </header>;
 }
 
 function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
-  const [query,setQuery]=useState('');
-  const [category,setCategory]=useState<'all'|CategoryId>('all');
-  const [level,setLevel]=useState<'all'|'B1+'|'B2'>('all');
-  const [status,setStatus]=useState<'all'|'open'|'complete'|'bookmarked'>('all');
-  const [libraryOpen,setLibraryOpen]=useState(false);
-  const filtered=filterTopics(topics,progress,query,category,level,status);
-  const completedCount=Object.values(progress.topics).filter(p=>p.completed).length;
-  const attempts=Object.values(progress.topics).reduce((sum,p)=>sum+p.attempts,0);
+  const tenseTopics=TENSE_LESSON_IDS.map(id=>getTopic(id)).filter((topic):topic is Topic=>Boolean(topic));
+  const [selectedId,setSelectedId]=useState(()=>progress.lastOpened&&TENSE_LESSON_IDS.includes(progress.lastOpened)?progress.lastOpened:'tense-system');
+  const selectedTopic=getTopic(selectedId)??tenseTopics[0];
+  const completedCount=tenseTopics.filter(topic=>topicProgress(progress,topic.id).completed).length;
+  const attempts=tenseTopics.reduce((sum,topic)=>sum+topicProgress(progress,topic.id).attempts,0);
   const isReady=(topic:Topic)=>!topic.prerequisite||topicProgress(progress,topic.prerequisite).completed;
-  const lastOpened=getTopic(progress.lastOpened??'');
-  const current=(lastOpened&&!topicProgress(progress,lastOpened.id).completed?lastOpened:undefined)
-    ??topics.find(topic=>!topicProgress(progress,topic.id).completed&&isReady(topic))
-    ??lastOpened
-    ??topics[0];
-  const recommended=topics.filter(topic=>topic.id!==current.id&&!topicProgress(progress,topic.id).completed&&(isReady(topic)||topic.prerequisite===current.id)).slice(0,3);
   return <main>
-    <section className="dash-hero">
-      <div><p className="eyebrow">Your next step</p><h1>Learn one thing.<br/><em>Use it today.</em></h1><p className="hero-lede">A focused lesson, two quick recall checks and a short practice. No need to plan the whole course.</p></div>
+    <section className="dash-hero tense-hero">
+      <div><p className="eyebrow">Your tense learning path</p><h1>Choose the right tense.<br/><em>Say exactly when.</em></h1><p className="hero-lede">Follow four focused lessons to understand time, compare similar forms and choose the tense that fits each situation.</p><div className="path-progress"><span>{completedCount} of {tenseTopics.length} lessons complete</span><i><b style={{width:`${tenseTopics.length?completedCount/tenseTopics.length*100:0}%`}}/></i></div></div>
       <div className="today-card">
-        <div className="today-card-top"><span>Recommended now</span><b>{current.minutes} min</b></div>
-        <span className={`category-pill ${categoryInfo[current.category].colour}`}>{categoryInfo[current.category].name}</span>
-        <h2>{current.title}</h2><p>{current.summary}</p>
-        <button className="button primary" onClick={()=>navigate(`/lesson/${current.id}`)}>{progress.lastOpened===current.id?'Continue lesson':'Start lesson'} <span>→</span></button>
-        <div className="learning-summary"><span><strong>{completedCount}</strong> completed</span><span><strong>{attempts}</strong> practices</span><span><strong>{completionPercent(progress,topics.length)}%</strong> overall</span></div>
+        <div className="today-card-top"><span>Selected lesson</span><b>{selectedTopic.minutes} min</b></div>
+        <span className="category-pill coral">Tenses</span>
+        <h2>{selectedTopic.title}</h2><p>{selectedTopic.summary}</p>
+        <div className="selected-lesson-actions"><button className="button primary" onClick={()=>navigate(`/lesson/${selectedTopic.id}`)}>Open lesson <span>→</span></button><button className="button secondary" onClick={()=>navigate(`/practice/${selectedTopic.id}`)}>Practice</button></div>
+        <div className="learning-summary"><span><strong>{completedCount}</strong> completed</span><span><strong>{attempts}</strong> practices</span><span><strong>{topicProgress(progress,selectedTopic.id).bestScore}%</strong> best score</span></div>
       </div>
     </section>
 
-    <section className="next-steps-section">
-      <div className="section-heading"><div><p className="eyebrow">After this lesson</p><h2>Your next steps</h2></div><p>These topics are ready for you. Finish one before choosing another.</p></div>
-      <div className="next-step-grid">{recommended.map((topic,index)=><article className="next-step-card" key={topic.id}><span>Step {index+2}</span><div className="topic-meta"><span className={`category-pill ${categoryInfo[topic.category].colour}`}>{categoryInfo[topic.category].name}</span><span>{topic.level} · {topic.minutes} min</span></div><h3>{topic.title}</h3><p>{topic.summary}</p><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Preview lesson →</button></article>)}</div>
-    </section>
-
-    <section className="library-section" id="topic-library">
-      <div className="library-title"><div><p className="eyebrow">Optional</p><h2>Looking for something specific?</h2><p>Browse the full course only when you want to choose your own focus.</p></div><button className="library-toggle" aria-expanded={libraryOpen} onClick={()=>setLibraryOpen(!libraryOpen)}>{libraryOpen?'Hide lesson library':'Browse all lessons'} <span>{libraryOpen?'↑':'↓'}</span></button></div>
-      {libraryOpen&&<div className="library-content"><label className="search-field"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search tenses, conditionals, writing…" aria-label="Search topics"/></label><div className="filters">
-        <select aria-label="Filter by category" value={category} onChange={e=>setCategory(e.target.value as typeof category)}><option value="all">All categories</option>{categoryOrder.map(id=><option value={id} key={id}>{categoryInfo[id].name}</option>)}</select>
-        <select aria-label="Filter by difficulty" value={level} onChange={e=>setLevel(e.target.value as typeof level)}><option value="all">All levels</option><option>B1+</option><option>B2</option></select>
-        <select aria-label="Filter by completion" value={status} onChange={e=>setStatus(e.target.value as typeof status)}><option value="all">Any status</option><option value="open">Not completed</option><option value="complete">Completed</option><option value="bookmarked">Bookmarked</option></select>
-        <button className="clear-filter" onClick={()=>{setQuery('');setCategory('all');setLevel('all');setStatus('all')}}>Clear filters</button>
-      </div>
-      <p className="results-count">{filtered.length} {filtered.length===1?'topic':'topics'}</p>
-      <div className="topic-grid">{filtered.map((topic,index)=><TopicCard key={topic.id} topic={topic} progress={progress} navigate={navigate} index={index}/>)}</div>
-      {!filtered.length&&<div className="empty-state"><strong>No lessons found.</strong><p>Try a broader search or clear the filters.</p></div>}</div>}
+    <section className="tense-path-section" aria-labelledby="tense-path-title">
+      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div><p>Start with the tense system, then choose the contrast you need. Every lesson includes examples and 12 practice questions.</p></div>
+      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);const ready=isReady(topic);const selected=topic.id===selectedTopic.id;return <article className={`tense-lesson-row ${selected?'selected':''}`} key={topic.id}>
+        <button className="tense-select" onClick={()=>setSelectedId(topic.id)} aria-pressed={selected}><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span><span className="lesson-status">{p.completed?'Completed':p.attempts?`Best ${p.bestScore}%`:ready?'Ready':'Builds on lesson 1'}</span></button>
+        <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>12 questions →</button></div>
+      </article>})}</div>
     </section>
   </main>;
-}
-
-function TopicCard({topic,progress,navigate,index}:{topic:Topic;progress:ProgressState;navigate:(to:string)=>void;index:number}) {
-  const p=topicProgress(progress,topic.id);
-  return <article className="topic-card">
-    <div className="topic-meta"><span className={`category-pill ${categoryInfo[topic.category].colour}`}>{categoryInfo[topic.category].name}</span><span>{topic.level} · {topic.minutes} min</span></div>
-    <h3>{topic.title}</h3><p>{topic.summary}</p>
-    <div className="topic-card-footer"><span>{p.completed?'✓ Completed':p.attempts?`Best score ${p.bestScore}%`:`Lesson ${String(index+1).padStart(2,'0')}`}</span><button aria-label={`Open ${topic.title}`} onClick={()=>navigate(`/lesson/${topic.id}`)}>→</button></div>
-  </article>;
 }
 
 function QuickCheck({exercise,number}:{exercise:Exercise;number:number}) {
@@ -139,22 +113,30 @@ function Lesson({topic,navigate,progress,save,progressHydrated}:{topic:Topic;nav
 }
 
 function Practice({topic,navigate,progress,save}:{topic:Topic;navigate:(to:string)=>void;progress:ProgressState;save:(p:ProgressState)=>void}) {
-  const [index,setIndex]=useState(0),[input,setInput]=useState(''),[selected,setSelected]=useState<string[]>([]),[checked,setChecked]=useState(false),[correctCount,setCorrectCount]=useState(0),[done,setDone]=useState(false);
+  const [index,setIndex]=useState(0),[answers,setAnswers]=useState<string[]>(()=>topic.exercises.map(()=>'')),[orders,setOrders]=useState<string[][]>(()=>topic.exercises.map(()=>[])),[checked,setChecked]=useState<boolean[]>(()=>topic.exercises.map(()=>false)),[done,setDone]=useState(false);
   const exercise=topic.exercises[index];
+  const input=answers[index]??'',selected=orders[index]??[];
   const answerValue=exercise.type==='ordering'?selected.join(' '):input;
   const correct=isCorrect(answerValue,exercise.answer.values);
-  const choose=(option:string)=>{if(!checked)setInput(option)};
-  const submit=()=>{if(!answerValue.trim())return;setChecked(true);if(isCorrect(answerValue,exercise.answer.values))setCorrectCount(c=>c+1)};
-  const next=()=>{if(index===topic.exercises.length-1){const final=Math.round((correctCount+(correct?0:0))/topic.exercises.length*100);save(recordScore(progress,topic.id,final));setDone(true);return;}setIndex(i=>i+1);setInput('');setSelected([]);setChecked(false)};
-  if(done){const score=Math.round(correctCount/topic.exercises.length*100);return <main className="result-page"><div className="result-ring"><strong>{score}%</strong><span>{score>=70?'Lesson complete':'Keep practising'}</span></div><p className="eyebrow">Practice result</p><h1>{score>=90?'Excellent control.':score>=70?'Strong progress.':'One more round?'}</h1><p>You answered {correctCount} of {topic.exercises.length} questions correctly. Every attempt strengthens retrieval.</p><div className="result-actions"><button className="button primary" onClick={()=>navigate(`/lesson/${topic.id}`)}>Return to lesson</button><button onClick={()=>{setIndex(0);setInput('');setSelected([]);setChecked(false);setCorrectCount(0);setDone(false)}}>Try again</button></div></main>}
+  const setInput=(value:string)=>setAnswers(current=>current.map((answer,i)=>i===index?value:answer));
+  const setSelected=(value:string[])=>setOrders(current=>current.map((answer,i)=>i===index?value:answer));
+  const choose=(option:string)=>{if(!checked[index])setInput(option)};
+  const scoreCount=topic.exercises.filter((item,i)=>checked[i]&&isCorrect(item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)).length;
+  const submit=()=>{if(answerValue.trim())setChecked(current=>current.map((value,i)=>i===index?true:value))};
+  const next=()=>{const nextIndex=topic.exercises.findIndex((_,i)=>i>index&&!checked[i]);if(nextIndex>=0){setIndex(nextIndex);return;}const firstOpen=checked.findIndex(value=>!value);if(firstOpen>=0){setIndex(firstOpen);return;}const final=Math.round(scoreCount/topic.exercises.length*100);save(recordScore(progress,topic.id,final));setDone(true)};
+  const reset=()=>{setIndex(0);setAnswers(topic.exercises.map(()=>''));setOrders(topic.exercises.map(()=>[]));setChecked(topic.exercises.map(()=>false));setDone(false)};
+  if(done){const score=Math.round(scoreCount/topic.exercises.length*100);return <main className="result-page"><div className="result-ring"><strong>{score}%</strong><span>{score>=70?'Lesson complete':'Keep practising'}</span></div><p className="eyebrow">Practice result</p><h1>{score>=90?'Excellent control.':score>=70?'Strong progress.':'One more round?'}</h1><p>You answered {scoreCount} of {topic.exercises.length} questions correctly. Every attempt strengthens retrieval.</p><div className="result-actions"><button className="button primary" onClick={()=>navigate(`/lesson/${topic.id}`)}>Return to lesson</button><button onClick={reset}>Try again</button></div></main>}
   return <main className="practice-page">
-    <div className="practice-top"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>× Exit</button><div><span>{topic.title}</span><div className="practice-bar"><i style={{width:`${(index+1)/topic.exercises.length*100}%`}}/></div></div><strong>{index+1} / {topic.exercises.length}</strong></div>
+    <div className="practice-top"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>× Exit</button><div><span>{topic.title}</span><div className="practice-bar"><i style={{width:`${checked.filter(Boolean).length/topic.exercises.length*100}%`}}/></div></div><strong>{checked.filter(Boolean).length} / {topic.exercises.length} answered</strong></div>
+    <div className="practice-workspace">
+    <aside className="question-list" aria-label="Question list"><div className="question-list-heading"><p className="eyebrow">Practice set</p><h2>All questions</h2><span>Select any question</span></div>{topic.exercises.map((item,i)=><button key={item.id} className={`${i===index?'active':''} ${checked[i]?'answered':''}`} onClick={()=>setIndex(i)} aria-current={i===index?'step':undefined}><span>{checked[i]?(isCorrect(item.type==='ordering'?orders[i].join(' '):answers[i],item.answer.values)?'✓':'×'):i+1}</span><span><strong>{item.type.replaceAll('-',' ')}</strong><small>{item.prompt}</small></span></button>)}</aside>
     <section className="question-card">
-      <div className="question-type">{exercise.type.replace('-',' ')}</div><h1>{exercise.prompt}</h1>
-      <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked} choose={choose}/>
-      {checked&&<div className={`feedback ${correct?'correct':'incorrect'}`} role="status"><strong>{correct?'✓ Correct':'Not quite yet'}</strong><p>{exercise.answer.explanation}</p>{!correct&&<p className="answer-line">Answer: {exercise.answer.values[0]}</p>}</div>}
-      <div className="question-actions">{!checked?<button className="button primary" disabled={!answerValue.trim()} onClick={submit}>Check answer</button>:<button className="button primary" onClick={next}>{index===topic.exercises.length-1?'See result':'Next question'} →</button>}</div>
+      <div className="question-context"><span>Question {index+1} of {topic.exercises.length}</span><span>{checked.filter(Boolean).length} answered</span></div><div className="question-type">{exercise.id.endsWith('-01')&&topic.category==='grammar'?'Select the correct tense':exercise.type.replace('-',' ')}</div><h1>{exercise.prompt}</h1>
+      <ExerciseInput exercise={exercise} input={input} setInput={setInput} selected={selected} setSelected={setSelected} checked={checked[index]} choose={choose}/>
+      {checked[index]&&<div className={`feedback ${correct?'correct':'incorrect'}`} role="status"><strong>{correct?'✓ Correct':'Not quite yet'}</strong><p>{exercise.answer.explanation}</p>{!correct&&<p className="answer-line">Answer: {exercise.answer.values[0]}</p>}</div>}
+      <div className="question-actions">{!checked[index]?<button className="button primary" disabled={!answerValue.trim()} onClick={submit}>Check answer</button>:<button className="button primary" onClick={next}>{checked.every(Boolean)?'See result':'Next unanswered'} →</button>}</div>
     </section>
+    </div>
   </main>;
 }
 
