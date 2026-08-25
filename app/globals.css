@@ -226,6 +226,8 @@ button:disabled{cursor:not-allowed;opacity:.48}
 }
 
 /* Focused learning flow */
+.course-library{padding-top:48px;min-height:calc(100vh - 78px)}
+.course-library .library-title h1{margin:0;font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);letter-spacing:-.04em}
 .dash-hero{min-height:auto;grid-template-columns:minmax(0,1fr) minmax(340px,520px);padding-top:68px;padding-bottom:68px}
 .dash-hero h1{font-size:clamp(52px,6.8vw,94px);margin-bottom:26px}
 .today-card{padding:34px;background:var(--raised);border:1px solid var(--line);border-top:7px solid var(--coral);border-radius:12px;box-shadow:18px 20px 0 color-mix(in srgb,var(--ink) 10%,transparent)}

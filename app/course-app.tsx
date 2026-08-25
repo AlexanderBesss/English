@@ -1,14 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { getTopic } from './content';
+import { categoryInfo, categoryOrder, getTopic, topics } from './content';
 import { isCorrect } from './content/shared';
-import { EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, topicProgress } from './lib/progress';
-import type { Exercise, ProgressState, Topic } from './lib/types';
+import { completionPercent, EMPTY_PROGRESS, loadProgress, recordScore, STORAGE_KEY, toggleBookmark, topicProgress } from './lib/progress';
+import { filterTopics, type TopicStatus } from './lib/search';
+import type { CategoryId, Exercise, ProgressState, Topic } from './lib/types';
 import { GeneralReferencePage, IrregularReferencePage, ReferenceHubPage, ReferenceReviewPage, TensesReferencePage } from './reference-pages';
 import { SpeechButton } from './speech-button';
 
 const TENSE_LESSON_IDS=['tense-system','present-perfect','narrative-tenses','future-forms'];
+const B1_TOPICS=topics.filter(topic=>topic.level==='B1+');
 
 function useRoute() {
   const [path,setPath]=useState('/');
@@ -35,7 +37,7 @@ function useTheme(){
 
 function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate:(to:string)=>void;progress:ProgressState;theme:Theme;toggleTheme:()=>void}) {
   const active=path.startsWith('/reference')?'reference':'learn';
-  const learnerPercent=Math.round(TENSE_LESSON_IDS.filter(id=>topicProgress(progress,id).completed).length/TENSE_LESSON_IDS.length*100);
+  const learnerPercent=completionPercent(progress,B1_TOPICS.length);
   return <header className="app-header">
     <button className="brand" onClick={()=>navigate('/')}><span className="brand-mark">FP</span><span>Fluent Path</span></button>
     <nav aria-label="Main navigation">
@@ -46,16 +48,13 @@ function Header({path,navigate,progress,theme,toggleTheme}:{path:string;navigate
   </header>;
 }
 
-function Dashboard({navigate,progress}:{navigate:(to:string)=>void;progress:ProgressState}) {
-  const tenseTopics=TENSE_LESSON_IDS.map(id=>getTopic(id)).filter((topic):topic is Topic=>Boolean(topic));
+function Dashboard({navigate,progress,save}:{navigate:(to:string)=>void;progress:ProgressState;save:(p:ProgressState)=>void}) {
+  const [query,setQuery]=useState('');
+  const [category,setCategory]=useState<'all'|CategoryId>('all');
+  const [status,setStatus]=useState<TopicStatus>('all');
+  const visible=filterTopics(B1_TOPICS,progress,query,category,'B1+',status);
   return <main>
-    <section className="tense-path-section" aria-labelledby="tense-path-title">
-      <div className="section-heading"><div><p className="eyebrow">Four-step course</p><h2 id="tense-path-title">Select a tense lesson</h2></div></div>
-      <div className="tense-lesson-list">{tenseTopics.map((topic,index)=>{const p=topicProgress(progress,topic.id);return <article className="tense-lesson-row" key={topic.id}>
-        <div className="tense-select"><span className="tense-step">{p.completed?'✓':String(index+1).padStart(2,'0')}</span><span><small>{index===0?'Foundation':index===1?'Present':index===2?'Past':'Future'}</small><strong>{topic.title}</strong><em>{topic.summary}</em></span></div>
-        <div className="tense-row-actions"><button onClick={()=>navigate(`/lesson/${topic.id}`)}>Lesson</button><button onClick={()=>navigate(`/practice/${topic.id}`)}>{topic.exercises.length} questions →</button></div>
-      </article>})}</div>
-    </section>
+    <section className="library-section course-library"><div className="library-title"><div><h1>B1+ lessons</h1><p>{visible.length} of {B1_TOPICS.length} lessons</p></div><label className="search-field"><span>⌕</span><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search lessons…" aria-label="Search B1+ lessons"/></label></div><div className="filters"><select value={category} onChange={event=>setCategory(event.target.value as 'all'|CategoryId)} aria-label="Filter by category"><option value="all">All areas</option>{categoryOrder.map(id=><option value={id} key={id}>{categoryInfo[id].name}</option>)}</select><select value={status} onChange={event=>setStatus(event.target.value as TopicStatus)} aria-label="Filter by progress"><option value="all">All progress</option><option value="open">Not completed</option><option value="complete">Completed</option><option value="bookmarked">Bookmarked</option></select>{(query||category!=='all'||status!=='all')&&<button className="clear-filter" onClick={()=>{setQuery('');setCategory('all');setStatus('all')}}>Clear filters</button>}</div><div className="topic-grid">{visible.map(topic=>{const p=topicProgress(progress,topic.id);return <article className="topic-card" key={topic.id}><div className="topic-meta"><span className={`category-pill ${categoryInfo[topic.category].colour}`}>{categoryInfo[topic.category].name}</span><span>{p.completed?'✓ Complete':`${topic.minutes} min`}</span></div><h3>{topic.title}</h3><p>{topic.summary}</p><div className="topic-card-footer"><button className={`bookmark ${p.bookmarked?'saved':''}`} onClick={()=>save(toggleBookmark(progress,topic.id))} aria-label={`${p.bookmarked?'Remove':'Add'} bookmark for ${topic.title}`}>{p.bookmarked?'★':'☆'}</button><span>{topic.exercises.length} questions</span><button onClick={()=>navigate(`/lesson/${topic.id}`)} aria-label={`Open ${topic.title}`}>→</button></div></article>})}</div>{!visible.length&&<div className="empty-state"><strong>No lessons match those filters.</strong><p>Try another area or clear the search.</p></div>}</section>
   </main>;
 }
 
@@ -140,7 +139,7 @@ export default function CourseApp() {
   const {progress,save,hydrated:progressHydrated}=useProgress();
   const {theme,toggle:toggleTheme}=useTheme();
   let content;
-  if(path==='/')content=<Dashboard navigate={navigate} progress={progress}/>;
+  if(path==='/')content=<Dashboard navigate={navigate} progress={progress} save={save}/>;
   else if(path==='/reference')content=<ReferenceHubPage navigate={navigate}/>;
   else if(path==='/reference/tenses')content=<TensesReferencePage navigate={navigate}/>;
   else if(path==='/reference/irregular-verbs')content=<IrregularReferencePage navigate={navigate}/>;

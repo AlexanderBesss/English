@@ -10,10 +10,10 @@ const themeScript = `(function(){try{var saved=localStorage.getItem('fluent-path
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
-  title: { default:'Fluent Path — English from B1 to B2', template:'%s | Fluent Path' },
-  description: 'Focused English lessons, practice and reference tools for moving confidently from B1 to B2.',
-  openGraph: { title:'Fluent Path', description:'English from B1 to B2', type:'website', images:[socialImage] },
-  twitter: { card:'summary_large_image', title:'Fluent Path', description:'English from B1 to B2', images:[socialImage] },
+  title: { default:'Fluent Path — Practical B1+ English', template:'%s | Fluent Path' },
+  description: 'A complete B1+ English path with grammar, vocabulary, reading, writing, listening, speaking and focused practice.',
+  openGraph: { title:'Fluent Path', description:'Practical B1+ English', type:'website', images:[socialImage] },
+  twitter: { card:'summary_large_image', title:'Fluent Path', description:'Practical B1+ English', images:[socialImage] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

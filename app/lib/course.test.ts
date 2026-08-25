@@ -7,11 +7,14 @@ import { referenceGuides } from '../content/reference/guides';
 import { tenseComparisons, tenseReferences } from '../content/grammar/tenses';
 
 describe('course content',()=>{
- it('contains the complete 30-topic path',()=>expect(topics).toHaveLength(30));
+ it('contains the expanded B1+ path and separate B2 extension topics',()=>{
+  expect(topics).toHaveLength(39);
+  expect(topics.filter(topic=>topic.level==='B1+')).toHaveLength(31);
+ });
  it('validates unique and complete exercise banks',()=>{
   expect(()=>validateTopics(topics)).not.toThrow();
   expect(topics.every(topic=>topic.exercises.length>=12)).toBe(true);
-  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(512);
+  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(620);
  });
  it('contains every planned category',()=>expect(new Set(topics.map(t=>t.category)).size).toBe(7));
  it('gives every tense-path question selectable options',()=>{
