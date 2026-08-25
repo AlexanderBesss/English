@@ -1,18 +1,18 @@
 export type ExampleContext = 'general' | 'software';
 
 export const softwareTenseExamples: Record<string, string[]> = {
-  'present-simple': ['Our CI pipeline runs after every push.', 'The API returns a 404 when the resource does not exist.'],
-  'present-continuous': ['The team is migrating the service to a new region.', 'I am reviewing the pull request now.'],
-  'present-perfect': ['We have deployed the fix to production.', 'The monitoring service has detected three failures today.'],
-  'present-perfect-continuous': ['The service has been dropping requests since the release.', 'We have been investigating the memory leak all morning.'],
-  'past-simple': ['The deployment failed during the maintenance window.', 'I opened the logs and found the exception.'],
-  'past-continuous': ['I was reviewing the patch when the build failed.', 'The workers were processing requests when the database went offline.'],
-  'past-perfect': ['The job had already timed out before the alert fired.', 'We rolled back because the release had broken authentication.'],
-  'past-perfect-continuous': ['We had been monitoring the service for an hour when latency increased.', 'The test had been running for twenty minutes before it failed.'],
-  'future-simple': ['I’ll open an issue for this bug.', 'The new index will probably improve query performance.'],
-  'future-continuous': ['At noon, we will be migrating the production database.', 'Will you be using the staging environment this afternoon?'],
-  'future-perfect': ['By Friday, we will have completed the API migration.', 'The pipeline will have finished before the release window opens.'],
-  'future-perfect-continuous': ['By June, the team will have been maintaining this service for five years.', 'At noon, the load test will have been running for six hours.'],
+  'present-simple': ['Our CI pipeline runs after every push.', 'The API returns a 404 when the resource does not exist.', 'The pipeline does not deploy builds from feature branches.', 'Does the health check run every minute?'],
+  'present-continuous': ['The team is migrating the service to a new region.', 'I am reviewing the pull request now.', 'The deployment is not updating the worker instances.', 'Are you reviewing the authentication changes?'],
+  'present-perfect': ['We have deployed the fix to production.', 'The monitoring service has detected three failures today.', 'The patch has not reached production yet.', 'Have you merged the database migration?'],
+  'present-perfect-continuous': ['The service has been dropping requests since the release.', 'We have been investigating the memory leak all morning.', 'The staging API has not been responding reliably.', 'Have you been monitoring the error rate?'],
+  'past-simple': ['The deployment failed during the maintenance window.', 'I opened the logs and found the exception.', 'The migration did not complete before the deadline.', 'Did the rollback restore the previous configuration?'],
+  'past-continuous': ['I was reviewing the patch when the build failed.', 'The workers were processing requests when the database went offline.', 'The service was not writing events to the audit log.', 'Were the workers processing messages during the outage?'],
+  'past-perfect': ['The job had already timed out before the alert fired.', 'We rolled back because the release had broken authentication.', 'The pipeline had not finished when the release window closed.', 'Had the access token expired before the request failed?'],
+  'past-perfect-continuous': ['We had been monitoring the service for an hour when latency increased.', 'The test had been running for twenty minutes before it failed.', 'The backup job had not been running before the disk filled up.', 'Had you been testing the endpoint before the incident began?'],
+  'future-simple': ['I’ll open an issue for this bug.', 'The new index will probably improve query performance.', 'We will not merge the patch without a security review.', 'Will the pipeline notify us if the deployment fails?'],
+  'future-continuous': ['At noon, we will be migrating the production database.', 'The team will be monitoring the rollout all afternoon.', 'We will not be using the staging cluster during the upgrade.', 'Will the team be deploying the frontend at six?'],
+  'future-perfect': ['By Friday, we will have completed the API migration.', 'The pipeline will have finished before the release window opens.', 'We will not have resolved every warning before the release.', 'Will the pipeline have finished by noon?'],
+  'future-perfect-continuous': ['By June, the team will have been maintaining this service for five years.', 'At noon, the load test will have been running for six hours.', 'The worker will not have been running long enough to collect useful metrics.', 'Will the team have been maintaining the legacy API for ten years by then?'],
 };
 
 export const softwareTenseComparisonExamples: Record<string, string[]> = {

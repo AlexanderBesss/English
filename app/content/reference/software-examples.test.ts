@@ -7,7 +7,10 @@ import { softwareGuideExamples, softwareTenseComparisonExamples, softwareTenseEx
 describe('software engineering reference examples', () => {
   it('covers every tense and comparison choice', () => {
     for (const tense of tenseReferences) {
-      expect(softwareTenseExamples[tense.id]?.length, tense.name).toBeGreaterThan(0);
+      const examples=softwareTenseExamples[tense.id]??[];
+      expect(examples.length, tense.name).toBeGreaterThanOrEqual(4);
+      expect(examples.some(example=>example.endsWith('?')), `${tense.name} question`).toBe(true);
+      expect(examples.some(example=>/\b(?:not|doesn't|isn't|hasn't|hadn't|won't)\b/i.test(example)), `${tense.name} negative`).toBe(true);
     }
 
     for (const comparison of tenseComparisons) {
