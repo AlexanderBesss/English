@@ -14,7 +14,6 @@ export function SpeechButton({text,label='Listen',className=''}:{text:string;lab
     window.speechSynthesis.cancel();
     const utterance=new SpeechSynthesisUtterance(text);
     utterance.lang='en-GB';
-    utterance.rate=.9;
     utterance.onend=()=>setPlaying(false);
     utterance.onerror=()=>setPlaying(false);
     window.speechSynthesis.speak(utterance);
