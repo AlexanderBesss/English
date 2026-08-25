@@ -14,7 +14,7 @@ const REVIEW_KEY='fluent-path-reference-review-v1';
 function useReferenceReview(){
   const [review,setReview]=useState<ReviewState>({});
   useEffect(()=>{const timer=window.setTimeout(()=>{try{const parsed=JSON.parse(localStorage.getItem(REVIEW_KEY)??'{}');if(parsed&&typeof parsed==='object')setReview(parsed)}catch{/* Ignore invalid device data. */}},0);return()=>window.clearTimeout(timer)},[]);
-  const update=(id:string,patch:Partial<ReviewMark>)=>setReview(current=>{const next={...current,[id]:{saved:false,...current[id],...patch}};localStorage.setItem(REVIEW_KEY,JSON.stringify(next));return next});
+  const update=(id:string,patch:Partial<ReviewMark>)=>setReview(current=>{const previous=current[id];const mark:ReviewMark={saved:patch.saved??previous?.saved??false,confidence:patch.confidence??previous?.confidence};const next={...current,[id]:mark};localStorage.setItem(REVIEW_KEY,JSON.stringify(next));return next});
   return {review,update};
 }
 
