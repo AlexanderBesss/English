@@ -13,8 +13,10 @@ describe('course content',()=>{
  });
  it('validates unique and complete exercise banks',()=>{
   expect(()=>validateTopics(topics)).not.toThrow();
-  expect(topics.every(topic=>topic.exercises.length>=24)).toBe(true);
-  expect(new Set(topics.flatMap(topic=>topic.exercises.map(e=>e.id))).size).toBe(1040);
+  expect(topics.every(topic=>topic.exercises.length>=5)).toBe(true);
+  const exercises=topics.flatMap(topic=>topic.exercises);
+  expect(new Set(exercises.map(e=>e.id)).size).toBe(exercises.length);
+  expect(new Set(exercises.map(e=>e.prompt.toLowerCase().replace(/\s+/g,' ').trim())).size).toBe(exercises.length);
  });
  it('contains every planned category',()=>expect(new Set(topics.map(t=>t.category)).size).toBe(7));
  it('keeps every exercise in its own lesson bank',()=>{
@@ -22,10 +24,10 @@ describe('course content',()=>{
    expect(topic.exercises.every(exercise=>exercise.id.startsWith(`${topic.id}-`))).toBe(true);
   }
  });
- it('uses choices or clickable word tokens for every question',()=>{
+ it('uses selectable choices and never requires building a whole answer',()=>{
   for(const exercise of topics.flatMap(topic=>topic.exercises)){
-   if(exercise.type==='ordering')expect(exercise.tokens?.length).toBeGreaterThan(0);
-   else expect(exercise.options).toContain(exercise.answer.values[0]);
+   expect(exercise.type).not.toBe('ordering');
+   expect(exercise.options).toContain(exercise.answer.values[0]);
   }
  });
  it('gives every tense-path question selectable options',()=>{

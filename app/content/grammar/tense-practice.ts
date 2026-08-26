@@ -2,13 +2,6 @@ import type { Exercise, Topic } from '../../lib/types';
 
 type Scenario = readonly [prompt:string, options:readonly string[], answer:string, tense:string];
 
-const lessonLabels:Record<string,string[]> = {
-  'tense-system':['present simple','present continuous','present perfect','present perfect continuous','past simple','past continuous','past perfect','will future','future continuous','future perfect'],
-  'present-perfect':['past simple','present perfect','present perfect continuous'],
-  'narrative-tenses':['past simple','past continuous','past perfect'],
-  'future-forms':['will','going to','present continuous for an arrangement','future continuous','future perfect'],
-};
-
 const scenarios:Record<string,Scenario[]> = {
   'tense-system':[
     ['Marta usually ___ from home on Fridays.',['works','is working','has worked'],'works','present simple'],
@@ -96,24 +89,151 @@ const scenarios:Record<string,Scenario[]> = {
   ],
 };
 
-function rotateOptions(labels:string[],answer:string,index:number) {
-  const distractors=labels.filter(label=>label!==answer);
-  const options=[answer,distractors[index%distractors.length],distractors[(index+3)%distractors.length]];
-  const shift=index%options.length;
-  return [...options.slice(shift),...options.slice(0,shift)];
-}
+const softwareScenarios:Record<string,Scenario[]> = {
+  'tense-system':[
+    ['Our CI pipeline ___ after every push.',['runs','is running','has run'],'runs','present simple'],
+    ['I ___ the authentication pull request right now.',['review','am reviewing','have reviewed'],'am reviewing','present continuous'],
+    ['We ___ the hotfix to production, so the error rate is falling.',['deploy','deployed yesterday','have deployed'],'have deployed','present perfect'],
+    ['The platform team ___ the memory leak since breakfast.',['investigates','investigated','has been investigating'],'has been investigating','present perfect continuous'],
+    ['The nightly build ___ at 02:14 yesterday.',['fails','has failed','failed'],'failed','past simple'],
+    ['The workers ___ messages when the database went offline.',['processed','were processing','had processed'],'were processing','past continuous'],
+    ['The access token ___ before the first request reached the API.',['expired','was expiring','had expired'],'had expired','past perfect'],
+    ['The alert is firing. I ___ the on-call engineer now.',['notify','am notifying every day','will notify'],'will notify','will future'],
+    ['At three tomorrow, we ___ the production rollout.',['monitor','will be monitoring','will have monitored'],'will be monitoring','future continuous'],
+    ['By Friday, the team ___ the database migration.',['will complete','will be completing','will have completed'],'will have completed','future perfect'],
+    ['The linter always ___ unused imports.',['flags','is flagging','has flagged'],'flags','present simple'],
+    ['The frontend team ___ the state layer this sprint.',['refactors every sprint','is refactoring','refactored last sprint'],'is refactoring','present continuous'],
+    ['The monitoring service ___ five incidents so far today.',['opens','opened yesterday','has opened'],'has opened','present perfect'],
+    ['The staging endpoint ___ intermittently since the release.',['fails','failed once','has been failing'],'has been failing','present perfect continuous'],
+    ['Mina ___ the feature branch yesterday afternoon.',['merges','has merged','merged'],'merged','past simple'],
+    ['We ___ the race condition when a second alert arrived.',['debugged','were debugging','had debugged'],'were debugging','past continuous'],
+    ['The proxy ___ the old response before we changed the cache key.',['cached','was caching','had cached'],'had cached','past perfect'],
+    ['I think the next compiler release ___ build times.',['improves','is improving now','will improve'],'will improve','will future'],
+    ['This time tomorrow, the mobile team ___ version 4.2.',['deploys','will be deploying','will have deployed'],'will be deploying','future continuous'],
+    ['By the end of the month, we ___ the deprecated endpoints.',['will remove','will be removing','will have removed'],'will have removed','future perfect'],
+    ['The scheduler ___ the backup job at midnight.',['starts','is starting now','has started yesterday'],'starts','present simple'],
+    ['We ___ the legacy queue with Kafka this quarter.',['replace annually','are replacing','replaced last year'],'are replacing','present continuous'],
+    ['I ___ three flaky tests so far this morning.',['fix','fixed last week','have fixed'],'have fixed','present perfect'],
+    ['The security team ___ the dependency graph all morning.',['analyses','analysed yesterday','has been analysing'],'has been analysing','present perfect continuous'],
+    ['The previous release ___ a regression in search.',['introduces','has introduced last year','introduced'],'introduced','past simple'],
+    ['The load tests ___ when the staging cluster restarted.',['ran once','were running','had run tomorrow'],'were running','past continuous'],
+    ['The rollback succeeded because we ___ the recovery procedure earlier.',['tested','were testing','had tested'],'had tested','past perfect'],
+    ['The deployment notification just arrived. I ___ the dashboard.',['check every hour','am checking yesterday','will check'],'will check','will future'],
+    ['At ten on Thursday, Priya ___ the architecture proposal.',['presents weekly','will be presenting','will have presented yesterday'],'will be presenting','future continuous'],
+    ['Before the review opens, I ___ the API documentation.',['will finish','will be finishing','will have finished'],'will have finished','future perfect'],
+    ['The gateway never ___ requests with invalid tokens.',['accepts','is accepting this week','accepted tomorrow'],'accepts','present simple'],
+  ],
+  'present-perfect':[
+    ['We ___ version 3.1 last Tuesday.',['have released','released','have been releasing'],'released','past simple'],
+    ['We ___ the security patch, so production is protected now.',['released yesterday','have released','have been releasing for hours'],'have released','present perfect'],
+    ['The team ___ the migration since nine o’clock.',['ran yesterday','has run once','has been running'],'has been running','present perfect continuous'],
+    ['I ___ the incident report an hour ago.',['have read','read','have been reading'],'read','past simple'],
+    ['I ___ the incident report, so I can explain the root cause.',['read last Monday','have read','have been reading since yesterday'],'have read','present perfect'],
+    ['She ___ pull requests all morning and needs a break.',['reviewed last week','has reviewed three','has been reviewing'],'has been reviewing','present perfect continuous'],
+    ['The API ___ 2,000 requests so far today.',['handled yesterday','has handled','has been handling 2,000'],'has handled','present perfect'],
+    ['The API ___ unusually slowly since the deployment.',['responded yesterday','has responded twice','has been responding'],'has been responding','present perfect continuous'],
+    ['The database ___ at 03:20 this morning.',['has restarted','restarted','has been restarting'],'restarted','past simple'],
+    ['We ___ this failure in three different environments.',['saw last year','have seen','have been seeing yesterday'],'have seen','present perfect'],
+    ['The worker ___ the same job repeatedly for twenty minutes.',['retried yesterday','has retried five times','has been retrying'],'has been retrying','present perfect continuous'],
+    ['Noah ___ the stale feature flag during yesterday’s cleanup.',['has removed','removed','has been removing'],'removed','past simple'],
+    ['Noah ___ all the stale feature flags, so the configuration is clean.',['removed last month','has removed','has been removing one flag'],'has removed','present perfect'],
+    ['We ___ for the source of the deadlock since lunch.',['looked yesterday','have found it','have been looking'],'have been looking','present perfect continuous'],
+    ['The vendor ___ a new SDK in 2025.',['has published','published','has been publishing'],'published','past simple'],
+    ['The vendor ___ three SDK updates this year.',['published in 2025','has published','has been publishing three'],'has published','present perfect'],
+    ['Our tests ___ intermittently since we upgraded the runner.',['failed last Friday','have failed twice yesterday','have been failing'],'have been failing','present perfect continuous'],
+    ['I ___ the reproduction steps during the morning stand-up.',['have shared','shared','have been sharing'],'shared','past simple'],
+    ['I ___ the reproduction steps in the issue, so anyone can test the bug.',['shared yesterday at ten','have shared','have been sharing for a minute'],'have shared','present perfect'],
+    ['The profiler ___ CPU samples for the past hour.',['collected yesterday','has collected exactly one','has been collecting'],'has been collecting','present perfect continuous'],
+    ['The release manager ___ the rollout at noon.',['has paused','paused','has been pausing'],'paused','past simple'],
+    ['The release manager ___ the rollout because the metrics are unstable.',['paused last Thursday','has paused','has been pausing every second'],'has paused','present perfect'],
+    ['Developers ___ about the new API limit all week.',['talked last year','have discussed it once','have been talking'],'have been talking','present perfect continuous'],
+    ['The old certificate ___ on 12 August.',['has expired','expired','has been expiring'],'expired','past simple'],
+    ['The certificate ___, so clients cannot establish secure connections.',['expired last year','has expired','has been expiring for hours'],'has expired','present perfect'],
+    ['The queue depth ___ steadily since traffic increased.',['rose yesterday','has risen to 500 once','has been rising'],'has been rising','present perfect continuous'],
+    ['We ___ the new index in staging last night.',['have tested','tested','have been testing'],'tested','past simple'],
+    ['We ___ the new index, and query latency is now 40% lower.',['tested at six yesterday','have tested','have been testing since tomorrow'],'have tested','present perfect'],
+    ['The documentation team ___ the migration guide for two days.',['updated last month','has updated five pages','has been updating'],'has been updating','present perfect continuous'],
+    ['The build system ___ 600 jobs this week.',['ran last week','has run','has been running 600'],'has run','present perfect'],
+    ['The build system ___ continuously since the release branch opened.',['ran yesterday','has run once','has been running'],'has been running','present perfect continuous'],
+  ],
+  'narrative-tenses':[
+    ['I ___ the deployment logs when the pager sounded.',['checked once','was checking','had checked tomorrow'],'was checking','past continuous'],
+    ['The primary database ___ offline without warning.',['went','was going for hours','had gone after recovery'],'went','past simple'],
+    ['The replica was ready because it ___ all pending changes.',['applied','was applying','had applied'],'had applied','past perfect'],
+    ['While Sam ___ the rollback, the error rate doubled.',['prepared once','was preparing','had prepared tomorrow'],'was preparing','past continuous'],
+    ['Sam ___ the release manager and requested approval.',['called','was calling all night','had called after approval'],'called','past simple'],
+    ['The manager knew that the team ___ the rollback in staging.',['tested later','was testing now','had tested'],'had tested','past perfect'],
+    ['The workers ___ normally when latency suddenly increased.',['ran once','were running','had run next week'],'were running','past continuous'],
+    ['A malformed request ___ the parser.',['crashed','was crashing for months','had crashed after the fix'],'crashed','past simple'],
+    ['The parser failed because validation ___ the invalid field.',['missed','was missing later','had missed'],'had missed','past perfect'],
+    ['We ___ the incident channel when a customer reported data loss.',['opened once','were opening','had opened tomorrow'],'were opening','past continuous'],
+    ['The on-call engineer ___ write traffic immediately.',['stopped','was stopping all week','had stopped before the report arrived'],'stopped','past simple'],
+    ['By then, the backup job ___ a consistent snapshot.',['created later','was creating','had created'],'had created','past perfect'],
+    ['As I ___ the failing test, another test timed out.',['debugged once','was debugging','had debugged next Friday'],'was debugging','past continuous'],
+    ['I ___ a shared global variable in the test setup.',['found','was finding for hours','had found after fixing it'],'found','past simple'],
+    ['The variable contained state that a previous test ___ behind.',['left','was leaving','had left'],'had left','past perfect'],
+    ['The team ___ the new cache when production traffic spiked.',['enabled once','was enabling','had enabled tomorrow'],'was enabling','past continuous'],
+    ['The hit rate ___ within a few minutes.',['improved','was improving yesterday at one point','had improved before enablement'],'improved','past simple'],
+    ['The cache worked because we ___ the keys correctly.',['designed later','were designing','had designed'],'had designed','past perfect'],
+    ['Maya ___ a code review when the branch protection rule changed.',['completed once','was completing','had completed next week'],'was completing','past continuous'],
+    ['The repository ___ her final approval.',['rejected','was rejecting for ten years','had rejected before the rule changed'],'rejected','past simple'],
+    ['She discovered that an administrator ___ a new requirement.',['added later','was adding tomorrow','had added'],'had added','past perfect'],
+    ['Customers ___ files when the storage service slowed down.',['uploaded once','were uploading','had uploaded next month'],'were uploading','past continuous'],
+    ['The autoscaler ___ two additional instances.',['started','was starting every year','had started after traffic ended'],'started','past simple'],
+    ['It reacted only after CPU usage ___ the threshold.',['crossed later','was crossing tomorrow','had crossed'],'had crossed','past perfect'],
+    ['We ___ the release notes when legal requested another change.',['published once','were publishing','had published next Tuesday'],'were publishing','past continuous'],
+    ['The technical writer ___ the affected paragraph.',['rewrote','was rewriting for one instant','had rewritten after publication'],'rewrote','past simple'],
+    ['Legal approved the text after they ___ the licence terms.',['checked later','were checking tomorrow','had checked'],'had checked','past perfect'],
+    ['The load generator ___ at full capacity when a node failed.',['ran once','was running','had run next year'],'was running','past continuous'],
+    ['Kubernetes ___ the failed pod on another node.',['scheduled','was scheduling for months','had scheduled before the failure'],'scheduled','past simple'],
+    ['The replacement started quickly because the image ___ on that node.',['arrived later','was downloading tomorrow','had already been cached'],'had already been cached','past perfect'],
+    ['I ___ the API response when the connection suddenly closed.',['inspected once','was inspecting','had inspected next week'],'was inspecting','past continuous'],
+  ],
+  'future-forms':[
+    ['The pager is ringing. I ___ the incident channel.',['open every day','am going to open from evidence','will open'],'will open','will'],
+    ['Look at the queue depth! It ___ its limit.',['will reach as a neutral guess','is going to reach','reaches yesterday'],'is going to reach','going to'],
+    ['We ___ the payments service at 18:00; the change is scheduled.',['will restart spontaneously','are restarting','will have restarted yesterday'],'are restarting','present continuous for an arrangement'],
+    ['At midnight, the platform team ___ the cluster upgrade.',['performs once','will be performing','will have performed before eleven'],'will be performing','future continuous'],
+    ['By Monday, we ___ every repository to the new CI system.',['will migrate then','will be migrating','will have migrated'],'will have migrated','future perfect'],
+    ['I forgot to add a test. I ___ one before I merge.',['write routinely','am writing yesterday','will write'],'will write','will'],
+    ['The CPU graph is climbing rapidly; the service ___.',['will crash without evidence','is going to crash','crashes last week'],'is going to crash','going to'],
+    ['Dana ___ the security reviewer tomorrow at ten; it is on her calendar.',['will call now','is calling','will have called yesterday'],'is calling','present continuous for an arrangement'],
+    ['This time tomorrow, users ___ the redesigned dashboard.',['test every day','will be testing','will have tested before today'],'will be testing','future continuous'],
+    ['By the release date, QA ___ all critical workflows.',['will verify then','will be verifying','will have verified'],'will have verified','future perfect'],
+    ['That task looks small. I ___ it after lunch.',['pick up weekly','am going to pick it up from evidence','will pick it up'],'will pick it up','will'],
+    ['We have approved the proposal, so we ___ the service in Rust.',['will rewrite spontaneously','are going to rewrite','will have rewritten last year'],'are going to rewrite','going to'],
+    ['The backend team ___ an architecture workshop on Friday; invitations are sent.',['will hold as an instant choice','is holding','will have held yesterday'],'is holding','present continuous for an arrangement'],
+    ['At four, I ___ the pull request with the author.',['review routinely','will be reviewing','will have reviewed before three'],'will be reviewing','future continuous'],
+    ['By four, I ___ every comment on the pull request.',['will address then','will be addressing','will have addressed'],'will have addressed','future perfect'],
+    ['The build just failed. I ___ the logs.',['inspect on Mondays','am inspecting yesterday','will inspect'],'will inspect','will'],
+    ['The team has bought new servers; it ___ a private runner pool.',['will create suddenly','is going to create','will have created last month'],'is going to create','going to'],
+    ['We ___ the database vendor next Wednesday; the meeting is confirmed.',['will meet now','are meeting','will have met yesterday'],'are meeting','present continuous for an arrangement'],
+    ['Do not deploy at two; we ___ a load test then.',['run regularly','will be running','will have run before one'],'will be running','future continuous'],
+    ['By two, the test harness ___ one million requests.',['will send then','will be sending','will have sent'],'will have sent','future perfect'],
+    ['I think serverless platforms ___ more common for small services.',['become yesterday','are becoming only now','will become'],'will become','will'],
+    ['Those error spikes are getting larger; the circuit breaker ___.',['will open as a guess','is going to open','opened tomorrow'],'is going to open','going to'],
+    ['The mobile developers ___ version 8.0 on Tuesday; the store date is booked.',['will release instantly','are releasing','will have released yesterday'],'are releasing','present continuous for an arrangement'],
+    ['At nine tonight, the SRE team ___ production metrics.',['watches daily','will be watching','will have watched before eight'],'will be watching','future continuous'],
+    ['By nine tonight, the rollout ___ all regions.',['will reach then','will be reaching','will have reached'],'will have reached','future perfect'],
+    ['I promise I ___ your branch before the deadline.',['review every week','am reviewing last month','will review'],'will review','will'],
+    ['We found several unsupported libraries, so we ___ the runtime.',['will upgrade spontaneously','are going to upgrade','will have upgraded last year'],'are going to upgrade','going to'],
+    ['Alex ___ the new observability dashboard tomorrow; the demo is arranged.',['will demonstrate now','is demonstrating','will have demonstrated yesterday'],'is demonstrating','present continuous for an arrangement'],
+    ['During the maintenance window, clients ___ read-only mode.',['use normally','will be using','will have used before the window'],'will be using','future continuous'],
+    ['Before traffic returns, we ___ the new configuration on every node.',['will validate then','will be validating','will have validated'],'will have validated','future perfect'],
+    ['The issue is assigned to me. I ___ the reproduction steps this afternoon.',['document every year','am documenting yesterday','will document'],'will document','will'],
+  ],
+};
 
 export function expandTensePractice(topic:Topic):Topic {
   const bank=scenarios[topic.id];
   if(!bank)return topic;
-  const labels=lessonLabels[topic.id];
-  const additions:Exercise[]=bank.flatMap(([prompt,options,answer,tense],index)=>{
-    const completed=prompt.replace('___',answer);
-    const start=13+index*2;
-    return [
-      {id:`${topic.id}-${String(start).padStart(2,'0')}`,type:'multiple-choice',prompt:`Choose the correct form: ${prompt}`,options:[...options],answer:{values:[answer],explanation:`“${answer}” uses ${tense}, which matches the time signal and viewpoint in this sentence.`}},
-      {id:`${topic.id}-${String(start+1).padStart(2,'0')}`,type:'multiple-choice',prompt:`Which tense or future form is used here? “${completed}”`,options:rotateOptions(labels,tense,index),answer:{values:[tense],explanation:`This is ${tense} because the verb phrase “${answer}” follows that form and expresses its time viewpoint.`}},
-    ];
-  });
-  return {...topic,exercises:[...topic.exercises.slice(0,12),...additions]};
+  const completeBank=[...bank,...(softwareScenarios[topic.id]??[])];
+  const exercises:Exercise[]=completeBank.map(([prompt,options,answer,tense],index)=>({
+    id:`${topic.id}-${String(index+1).padStart(2,'0')}`,
+    type:'multiple-choice',
+    prompt:`Choose the correct form: ${prompt}`,
+    options:[...options],
+    answer:{values:[answer],explanation:`“${answer}” uses ${tense}, which matches the time signal and viewpoint in this sentence.`},
+  }));
+  return {...topic,exercises};
 }

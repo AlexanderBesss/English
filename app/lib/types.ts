@@ -1,5 +1,5 @@
 export type CategoryId = 'grammar' | 'verbs' | 'vocabulary' | 'reading' | 'writing' | 'listening' | 'speaking';
-export type ExerciseType = 'multiple-choice' | 'gap-fill' | 'matching' | 'ordering' | 'transformation' | 'error-correction' | 'short-answer';
+export type ExerciseType = 'multiple-choice' | 'gap-fill' | 'matching' | 'transformation' | 'error-correction' | 'short-answer';
 
 export interface LearningObjective { id: string; text: string }
 export interface Example { label: string; sentence: string; note: string }
@@ -10,7 +10,6 @@ export interface Exercise {
   type: ExerciseType;
   prompt: string;
   options?: string[];
-  tokens?: string[];
   answer: Answer;
 }
 export interface Topic {
