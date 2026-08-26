@@ -63,7 +63,6 @@ export function validateTopics(topics: Topic[]) {
       if (prompts.has(promptKey)) throw new Error(`Duplicate exercise prompt: ${exercise.prompt}`);
       prompts.add(promptKey);
       if (!exercise.answer.values.length || !exercise.answer.explanation) throw new Error(`Invalid answer: ${exercise.id}`);
-      if (exercise.type === 'ordering') throw new Error(`Whole-answer ordering exercises are not allowed: ${exercise.id}`);
       if (!exercise.options?.length || !exercise.options.includes(exercise.answer.values[0])) {
         throw new Error(`Selectable answer missing from options: ${exercise.id}`);
       }
