@@ -37,6 +37,9 @@ describe('course content',()=>{
   expect(tenseTopics.every(topic=>topic.exercises.length===50)).toBe(true);
   expect(tenseExercises).toHaveLength(200);
   expect(tenseExercises.every(exercise=>exercise.options?.length&&exercise.options.includes(exercise.answer.values[0]))).toBe(true);
+  expect(tenseExercises.every(exercise=>exercise.answer.explanation.startsWith('In “'))).toBe(true);
+  expect(tenseExercises.every(exercise=>!exercise.answer.explanation.includes('matches the time signal and viewpoint'))).toBe(true);
+  expect(new Set(tenseExercises.map(exercise=>exercise.answer.explanation)).size).toBe(tenseExercises.length);
  });
 });
 

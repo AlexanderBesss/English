@@ -224,6 +224,28 @@ const softwareScenarios:Record<string,Scenario[]> = {
   ],
 };
 
+const tenseReason:Record<string,(answer:string)=>string> = {
+  'present simple': answer=>`“${answer}” presents this as a regular process, routine, or stable fact rather than an action limited to the present moment.`,
+  'present continuous': answer=>`“${answer}” presents the activity as happening now or during a temporary period around now.`,
+  'present perfect': answer=>`“${answer}” links a completed past action to the present—usually through a current result, present relevance, or an unfinished time period.`,
+  'present perfect continuous': answer=>`“${answer}” emphasises an activity that began earlier and has continued up to now, including its duration or visible current effect.`,
+  'past simple': answer=>`“${answer}” places the completed event in a finished past time and does not connect it grammatically to the present.`,
+  'past continuous': answer=>`“${answer}” shows an activity already in progress around a past moment, often when a shorter event interrupted it.`,
+  'past perfect': answer=>`“${answer}” marks the earlier of two past events, making the sequence clear before the later past reference point.`,
+  'will': answer=>`“${answer}” expresses a decision made now, a promise, or a neutral prediction rather than a prior plan based on present evidence.`,
+  'will future': answer=>`“${answer}” expresses a decision made at the moment of speaking or a neutral prediction about the future.`,
+  'going to': answer=>`“${answer}” is appropriate because the prediction has visible present evidence or the intention was formed before speaking.`,
+  'present continuous for an arrangement': answer=>`“${answer}” describes a fixed future arrangement supported by a scheduled time, booking, or calendar entry.`,
+  'future continuous': answer=>`“${answer}” places the activity in progress at the stated future time rather than viewing it as a single completed event.`,
+  'future perfect': answer=>`“${answer}” shows that the action will be complete before the stated future deadline or reference point.`,
+};
+
+function explainScenario(prompt:string,answer:string,tense:string) {
+  const completed=prompt.replace('___',answer);
+  const reason=tenseReason[tense]?.(answer)??`“${answer}” supplies the ${tense} form required by this context.`;
+  return `In “${completed}”, ${reason.charAt(0).toLowerCase()}${reason.slice(1)}`;
+}
+
 export function expandTensePractice(topic:Topic):Topic {
   const bank=scenarios[topic.id];
   if(!bank)return topic;
@@ -233,7 +255,7 @@ export function expandTensePractice(topic:Topic):Topic {
     type:'multiple-choice',
     prompt:`Choose the correct form: ${prompt}`,
     options:[...options],
-    answer:{values:[answer],explanation:`“${answer}” uses ${tense}, which matches the time signal and viewpoint in this sentence.`},
+    answer:{values:[answer],explanation:explainScenario(prompt,answer,tense)},
   }));
   return {...topic,exercises};
 }
