@@ -75,19 +75,41 @@ function QuickCheck({exercise,number}:{exercise:Exercise;number:number}) {
   </aside>;
 }
 
-function Lesson({topic,progress,save,progressHydrated}:{topic:Topic;progress:ProgressState;save:(p:ProgressState)=>void;progressHydrated:boolean}) {
+const TEXT_SIZE_KEY='fluent-path-text-size';
+type TextSize='standard'|'large'|'xl';
+const TEXT_SIZES:{value:TextSize;label:string;scale:number}[]=[
+  {value:'standard',label:'Standard text size',scale:1},
+  {value:'large',label:'Large text size',scale:1.35},
+  {value:'xl',label:'Extra large text size',scale:1.7},
+];
+
+function Lesson({topic,progress,save,progressHydrated,navigate}:{topic:Topic;progress:ProgressState;save:(p:ProgressState)=>void;progressHydrated:boolean;navigate:(to:string)=>void}) {
   useEffect(()=>{if(progressHydrated&&progress.lastOpened!==topic.id){const timer=window.setTimeout(()=>save({...progress,lastOpened:topic.id}),0);return()=>window.clearTimeout(timer)}},[progress,progressHydrated,save,topic.id]);
   const [transcriptOpen,setTranscriptOpen]=useState(false);
+  const [textSize,setTextSize]=useState<TextSize>('standard');
+  useEffect(()=>{const timer=window.setTimeout(()=>{const saved=window.localStorage.getItem(TEXT_SIZE_KEY);if(saved==='large'||saved==='xl')setTextSize(saved)},0);return()=>window.clearTimeout(timer)},[]);
+  const chooseTextSize=(size:TextSize)=>{setTextSize(size);window.localStorage.setItem(TEXT_SIZE_KEY,size)};
+  const topicStatus=topicProgress(progress,topic.id);
   const compareId=`${topic.id}-compare`,mistakeId=`${topic.id}-mistake`,listeningId=`${topic.id}-listening`,productionId=`${topic.id}-production`;
   const outline=[
-    ...topic.sections.map((section,index)=>({id:section.id,label:index===0?'Key idea':'Meaning & examples'})),
+    ...topic.sections.map(section=>({id:section.id,label:section.title})),
     ...(topic.table?[{id:compareId,label:'Compare forms'}]:[]),
     {id:mistakeId,label:'Common mistake'},
     ...(topic.transcript?[{id:listeningId,label:'Listening'}]:[]),
     {id:productionId,label:'Use it'},
   ];
   const stepNumber=(id:string)=>String(outline.findIndex(item=>item.id===id)+1).padStart(2,'0');
-  return <main className="lesson-page">
+  return <main className="lesson-page" data-text-size={textSize==='standard'?undefined:textSize}>
+    <header className="lesson-head">
+      <nav className="lesson-crumbs" aria-label="Breadcrumb"><button onClick={()=>navigate('/')}>All lessons</button><span aria-hidden="true">/</span><span>{categoryInfo[topic.category].name}</span></nav>
+      <h1>{topic.title}</h1>
+      <p className="lesson-summary">{topic.summary}</p>
+      <div className="lesson-meta"><span>{topic.level}</span><span>{topic.minutes} minute read</span><span>{topic.exercises.length} practice questions</span>{topicStatus.completed&&<span>✓ Practice completed</span>}{!topicStatus.completed&&topicStatus.attempts>0&&<span>Best score {topicStatus.bestScore}%</span>}</div>
+      <div className="lesson-cta">
+        <button className="button primary" onClick={()=>navigate(`/practice/${topic.id}`)}>Practise these forms →</button>
+        <div className="text-size" role="group" aria-label="Lesson text size"><p>Text size</p><div>{TEXT_SIZES.map(size=><button key={size.value} type="button" aria-pressed={textSize===size.value} aria-label={size.label} title={size.label} onClick={()=>chooseTextSize(size.value)}><b style={{fontSize:`${size.scale}em`}}>A</b></button>)}</div></div>
+      </div>
+    </header>
     <nav className="lesson-roadmap" aria-label="Lesson sections"><div><p className="eyebrow">Lesson map</p><strong>{outline.length} clear steps</strong></div><div>{outline.map((item,index)=><a href={`#${item.id}`} key={item.id}><span>{String(index+1).padStart(2,'0')}</span><strong>{item.label}</strong></a>)}</div></nav>
     <div className="lesson-layout">
       <article className="lesson-content">
@@ -146,7 +168,7 @@ export default function CourseApp() {
   else if(path==='/reference/irregular-verbs')content=<IrregularReferencePage navigate={navigate}/>;
   else if(path==='/reference/review')content=<ReferenceReviewPage navigate={navigate}/>;
   else if(path.startsWith('/reference/guide/'))content=<GeneralReferencePage guideId={path.split('/')[3]} navigate={navigate}/>;
-  else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} progress={progress} save={save} progressHydrated={progressHydrated}/>:<NotFound navigate={navigate}/>;}
+  else if(path.startsWith('/lesson/')){const topic=getTopic(path.split('/')[2]);content=topic?<Lesson topic={topic} progress={progress} save={save} progressHydrated={progressHydrated} navigate={navigate}/>:<NotFound navigate={navigate}/>;}
   else if(path.startsWith('/practice/')){const topic=getTopic(path.split('/')[2]);content=topic?<Practice topic={topic} navigate={navigate} progress={progress} save={save}/>:<NotFound navigate={navigate}/>;}
   else content=<NotFound navigate={navigate}/>;
   return <><Header path={path} navigate={navigate} progress={progress} theme={theme} toggleTheme={toggleTheme}/><div id="main-content">{content}</div></>;

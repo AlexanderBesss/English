@@ -159,7 +159,7 @@ export function IrregularReferencePage({navigate}:{navigate:Navigate}){
 
 function GuideItemCard({guideId,item,index}:{guideId:string;item:ReferenceItem;index:number}){
   const [open,setOpen]=useState(false);
-  const examples=[...item.examples,...(softwareGuideExamples[guideId]?.[item.id]??[])];
+  const examples=[...new Set([...item.examples,...(softwareGuideExamples[guideId]?.[item.id]??[])])];
   return <article className="guide-item-card"><div className="guide-card-cover"><span>{String(index+1).padStart(2,'0')}</span><strong>{item.tags[0]??'Key pattern'}</strong><i aria-hidden="true">A → B</i></div><div className="guide-item-heading"><div><div className="signal-list">{item.tags.map(tag=><span key={tag}>{tag}</span>)}</div><h2>{item.title}</h2></div><button onClick={()=>setOpen(!open)} aria-expanded={open}>{open?'Collapse':'Study'}</button></div><div className="guide-pattern"><small>Pattern or key distinction</small><strong>{item.pattern}</strong></div><p>{item.explanation}</p><div className="guide-examples">{examples.map(example=><div className="speakable-example" key={example}><blockquote>{example}</blockquote><SpeechButton text={example}/></div>)}</div>{open&&<div className="guide-study">{item.mistake&&<div className="micro-mistake"><span>× {item.mistake.wrong}</span><span>✓ {item.mistake.right}</span></div>}<RecallCheck prompt={item.prompt} answer={item.answer}/></div>}</article>;
 }
 
